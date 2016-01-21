@@ -1,0 +1,4 @@
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform

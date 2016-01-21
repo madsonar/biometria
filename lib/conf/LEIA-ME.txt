@@ -1,0 +1,22 @@
+# Tipo de Operacao
+
+type 
+# default 1 (Integer)
+1 => ler 
+2 => gravar
+
+# Cliente
+# default "Sindical" (String)
+client
+
+
+# Dispositivo
+# default 0
+device (Numero do dispositivo (Integer))
+model (Modelo) (String)
+placed (default true) habilita o sensor ao colocar o dedo
+
+# Marca
+# brand
+TopData (Gravação pelo layout de digital da catraca topdata)
+Nitgen (Gravação pelo layout de digital da Nitgen)

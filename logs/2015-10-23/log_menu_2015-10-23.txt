@@ -1,0 +1,19 @@
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: %1 is not a valid Win32 application
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: %1 is not a valid Win32 application
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: %1 is not a valid Win32 application
+Erro ao carregar DLL. no NBioBSPJNI in java.library.path
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load AMD 64-bit .dll on a IA 32-bit platform
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't find dependent libraries
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't find dependent libraries
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't find dependent libraries
+Erro ao carregar DLL. no NBioBSPJNI in java.library.path
+Erro ao carregar DLL. no NBioBSPJNI in java.library.path
+Nenhum dispostivo encontrado
+Nenhum dispostivo encontrado
+Nenhum dispostivo encontrado
+Nenhum dispostivo encontrado
+Nenhum dispostivo encontrado
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+Nenhum dispostivo encontrado
+Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load IA 32-bit .dll on a AMD 64-bit platform
+Nenhum dispostivo encontrado

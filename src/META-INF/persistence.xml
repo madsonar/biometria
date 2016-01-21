@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+    <persistence-unit name="ComercioAraras">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>      
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="Sindical">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ComercioSertaozinho">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="GraficosRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>    
+    <persistence-unit name="VestuarioLimeira">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="SinpaaeRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ComercioItapetininga">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ComercioLimeira">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="FederacaoBH">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="SeaacRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="MetalRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ExtrativaRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="AlimentacaoArceburgo">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="FederacaoExtrativaSP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ExtrativaSP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="GaragistaRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="HoteleiroRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="MetalBatatais">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="Rtools">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ComercioRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="SeaacFranca">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>    
+    <persistence-unit name="ServidoresRP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="SincovagaSP">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="comerciorp">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+    <persistence-unit name="ComercioLimeiraTeste">
+        <provider>oracle.toplink.essentials.PersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <properties>
+        </properties>
+    </persistence-unit>
+</persistence> 

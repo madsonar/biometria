@@ -1,0 +1,2 @@
+Rede local desabilitada!
+Servidor da remoto encontra-se inátivo! Possível causa: A rede central esta com problemas.
