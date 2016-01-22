@@ -11,6 +11,7 @@ import br.com.leitor.pessoa.dao.BiometriaCatracaDao;
 import br.com.leitor.pessoa.dao.BiometriaDao;
 import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
+import br.com.leitor.utils.DataHoje;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
 import java.awt.AWTException;
@@ -63,7 +64,9 @@ public class Menu extends JFrame implements ActionListener {
     private PopupMenu popupMenu;
     private MenuItem aboutItem, exitItem, restart;
     private Boolean started;
-    Boolean reload = true;
+    private Boolean reload = true;
+    private Boolean reloadListBiometria = false;
+    private String startedDate = DataHoje.data();
 
     static {
         try {
@@ -177,6 +180,12 @@ public class Menu extends JFrame implements ActionListener {
                     about();
                 }
             };
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent evt) {
+                    System.exit(0);
+                }
+            });
             if (tipo == 1) {
                 title = "Ler";
             } else if (tipo == 2) {
@@ -251,22 +260,31 @@ public class Menu extends JFrame implements ActionListener {
             BiometriaAtualizaCatraca bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
             bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
             if (bac != null) {
-                if (conf.getDevice() == 1) {
-                    reload = true;
-                    listBiometria.clear();
-                    bac.setAparelho1(false);
-                } else if (conf.getDevice() == 2) {
-                    reload = true;
-                    listBiometria.clear();
-                    bac.setAparelho2(false);
-                } else if (conf.getDevice() == 3) {
-                    reload = true;
-                    listBiometria.clear();
-                    bac.setAparelho3(false);
-                } else if (conf.getDevice() == 4) {
-                    reload = true;
-                    listBiometria.clear();
-                    bac.setAparelho4(false);
+                if (null != conf.getDevice()) {
+                    switch (conf.getDevice()) {
+                        case 1:
+                            reload = true;
+                            listBiometria.clear();
+                            bac.setAparelho1(false);
+                            break;
+                        case 2:
+                            reload = true;
+                            listBiometria.clear();
+                            bac.setAparelho2(false);
+                            break;
+                        case 3:
+                            reload = true;
+                            listBiometria.clear();
+                            bac.setAparelho3(false);
+                            break;
+                        case 4:
+                            reload = true;
+                            listBiometria.clear();
+                            bac.setAparelho4(false);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 new Dao().update(bac, true);
             }
@@ -274,7 +292,29 @@ public class Menu extends JFrame implements ActionListener {
                 if (reload) {
                     reload = false;
                     nitgen.setLoad(true);
-                    nitgen.loadBiometria(getListBiometria());
+                    List<Biometria> list = getListBiometria();
+                    for (int i = 0; i < list.size(); i++) {
+                        if (null != conf.getDevice()) {
+                            switch (conf.getDevice()) {
+                                case 1:
+                                    list.get(i).setDataAtualizacaoAparelho1(null);
+                                    break;
+                                case 2:
+                                    list.get(i).setDataAtualizacaoAparelho2(null);
+                                    break;
+                                case 3:
+                                    list.get(i).setDataAtualizacaoAparelho3(null);
+                                    break;
+                                case 4:
+                                    list.get(i).setDataAtualizacaoAparelho4(null);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        new Dao().update(list.get(i), true);
+                    }  
+                    nitgen.loadBiometria(reloadListBiometria, list);
                     nitgen.setLoad(false);
                 }
                 if (nitgen.getOpen()) {
@@ -325,7 +365,6 @@ public class Menu extends JFrame implements ActionListener {
     }
 
     public void non_device() {
-        JOptionPane.showMessageDialog(null, "Nenhum dispostivo encontrado");
         Logs logs = new Logs();
         logs.save("menu", "Nenhum dispostivo encontrado");
         try {
@@ -528,8 +567,21 @@ public class Menu extends JFrame implements ActionListener {
     }
 
     public List getListBiometria() {
+        if (reloadListBiometria) {
+            if (!startedDate.equals(DataHoje.data())) {
+                reloadListBiometria = false;
+                listBiometria.clear();
+                startedDate = DataHoje.data();
+                new BiometriaDao().reload();
+            }
+        }
         if (listBiometria.isEmpty()) {
-            listBiometria = new BiometriaDao().listBiometria();
+            if (reloadListBiometria) {
+                listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
+            } else {
+                listBiometria = new BiometriaDao().listBiometria();
+                reloadListBiometria = true;
+            }
         }
         return listBiometria;
     }

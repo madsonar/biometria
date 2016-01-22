@@ -13,6 +13,7 @@ import br.com.leitor.utils.BlockInterface;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Mac;
 import br.com.leitor.utils.Ping;
+import br.com.leitor.utils.PreloaderDialog;
 import br.com.leitor.utils.Session;
 import br.com.leitor.utils.WebService;
 import java.awt.GridLayout;
@@ -20,10 +21,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -93,19 +95,26 @@ public final class Index extends JFrame implements ActionListener {
                 Dao dao = new Dao();
                 if (!list.isEmpty()) {
                     BiometriaServidor biometriaServidor = list.get(0);
-                    if (!biometriaServidor.isAtivo()) {
+                    if (!biometriaServidor.getAtivo()) {
+                        biometriaServidor.setDataAtivo(new Date());
                         biometriaServidor.setAtivo(true);
                         dao.update(biometriaServidor, true);
                     }
                 } else {
                     BiometriaServidor biometriaServidor = new BiometriaServidor();
+                    biometriaServidor.setDataAtivo(new Date());
                     biometriaServidor.setAtivo(true);
                     biometriaServidor.setMacFilial(macFilial);
                     dao.save(biometriaServidor, true);
                 }
             }
+        } else {
+            new BiometriaDao().reload(conf.getDevice());
         }
         Close.clear();
+        // PreloaderDialog pd = new PreloaderDialog();
+        // pd.show("Iniciando");
+        // pd.hide();
         new Menu().setVisible(false);
     }
 

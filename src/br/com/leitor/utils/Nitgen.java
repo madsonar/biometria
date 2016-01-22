@@ -11,6 +11,7 @@ import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
 import com.nitgen.SDK.BSP.NBioBSPJNI;
 import com.nitgen.SDK.BSP.NBioBSPJNI.DEVICE_ENUM_INFO;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,18 +58,19 @@ public class Nitgen {
 
     public void loadHardware() throws Exception {
         open = false;
+        int n = 0;
         try {
             this.nBioBSP = new NBioBSPJNI();
             this.device = this.nBioBSP.new DEVICE_ENUM_INFO();
             this.nBioBSP.EnumerateDevice(this.device);
             this.indexSearch = this.nBioBSP.new IndexSearch();
+            n = this.device.DeviceCount;
         } catch (NoSuchFieldError | UnsatisfiedLinkError | Exception e) {
             Logs logs = new Logs();
             logs.save("menu", "Erro ao carregar DLL. " + e.getMessage());
             JOptionPane.showMessageDialog(null, "Erro ao carregar DLL. " + e.getMessage());
             throw new Exception("Erro ao carregar DLL. " + e.getMessage());
         }
-        int n = this.device.DeviceCount;
         device_start = n;
         if (n == 0) {
             setHardware(false);
@@ -201,6 +203,10 @@ public class Nitgen {
                 biometria.setLancamento(DataHoje.dataHoje());
                 biometria.setPessoa(pessoa);
                 biometria.setAtivo(true);
+                biometria.setDataAtualizacaoAparelho1(new Date());
+                biometria.setDataAtualizacaoAparelho2(new Date());
+                biometria.setDataAtualizacaoAparelho3(new Date());
+                biometria.setDataAtualizacaoAparelho4(new Date());
                 if (!dao.save(biometria, true)) {
                     return 0;
                 }
@@ -216,15 +222,17 @@ public class Nitgen {
                             }
                             nBioBSP.OpenDevice(device.DeviceInfo[i].NameID, device.DeviceInfo[i].Instance);
                         } catch (Exception e) {
-                            
+
                         }
-                    }   NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
+                    }
+                    NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
                     nBioBSP.Enroll(hFIR, null);
                     if (checkError()) {
                         if (nBioBSP.GetErrorCode() == NBioBSPJNI.ERROR.NBioAPIERROR_FUNCTION_FAIL) {
                             nBioBSP.Capture(hFIR);
+                        }
                     }
-                    }   NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                    NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
                     NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
                     inputFIR.SetFIRHandle(hFIR);
                     NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
@@ -240,16 +248,22 @@ public class Nitgen {
                     indexSearch.Identify(inputFIR, 5, fpInfo);
                     indexSearch.AddFIR(inputFIR, userID, sampleInfo);
                     if (checkError()) {
-                    return 0;
-                    }   this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
+                        return 0;
+                    }
+                    this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
                     this.digitalCapturadaString = textSavedFIR.TextFIR;
                     nBioBSP.CloseDevice(device.DeviceInfo[0].NameID, device.DeviceInfo[0].Instance);
                     if (this.digitalCapturadaString == null) {
+                        biometria.setDataAtualizacaoAparelho1(new Date());
+                        biometria.setDataAtualizacaoAparelho2(new Date());
+                        biometria.setDataAtualizacaoAparelho3(new Date());
+                        biometria.setDataAtualizacaoAparelho4(new Date());
                         biometria.setAtivo(false);
-                    dao.update(biometria, true);
-                    return 2;
-                    }   biometria.setBiometria(digitalCapturadaString);
-                    if (!biometria.isAtivo()) {
+                        dao.update(biometria, true);
+                        return 2;
+                    }
+                    biometria.setBiometria(digitalCapturadaString);
+                    if (!biometria.getAtivo()) {
                         Object[] options = {"Sim", "Não"};
                         int resposta = JOptionPane.showOptionDialog(null,
                                 "Tem certeza que reativar esta biometria?", "Mensagem do Programa",
@@ -259,19 +273,22 @@ public class Nitgen {
                             List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
                             if (!list.isEmpty()) {
                                 biometria.setAtivo(true);
+                                biometria.setDataAtualizacaoAparelho1(new Date());
+                                biometria.setDataAtualizacaoAparelho2(new Date());
+                                biometria.setDataAtualizacaoAparelho3(new Date());
+                                biometria.setDataAtualizacaoAparelho4(new Date());
                                 if (!dao.update(biometria, true)) {
                                     return 0;
                                 }
                             }
                             // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
                             return 4;
-                            
+
                         }
-                    } else {
-                        if (!dao.update(biometria, true)) {
-                            return 0;
-                        }
-                    }   Close.clear();
+                    } else if (!dao.update(biometria, true)) {
+                        return 0;
+                    }
+                    Close.clear();
                     hFIR.dispose();
                     hFIR = null;
                     break;
@@ -295,11 +312,12 @@ public class Nitgen {
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(null, ex);
                         }
-                        
+
                         if (!digital_capturada_1 || !digital_capturada_2) {
                             return 0;
                         }
-                    }   if (digital1.toString().isEmpty() || digital2.toString().isEmpty()) {
+                    }
+                    if (digital1.toString().isEmpty() || digital2.toString().isEmpty()) {
                         biometria.setAtivo(false);
                         biometria.setEnviado(true);
                         dao.update(biometria, true);
@@ -308,7 +326,7 @@ public class Nitgen {
                     biometria.setBiometria(digital1.toString());
                     biometria.setBiometria2(digital2.toString());
                     biometria.setEnviado(false);
-                    if (!biometria.isAtivo()) {
+                    if (!biometria.getAtivo()) {
                         Object[] options = {"Sim", "Não"};
                         int resposta = JOptionPane.showOptionDialog(null,
                                 "Tem certeza que reativar esta biometria?", "Mensagem do Programa",
@@ -321,16 +339,15 @@ public class Nitgen {
                                 if (!dao.update(biometria, true)) {
                                     return 0;
                                 }
-                        }
-                        // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
-                        return 4;
+                            }
+                            // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
+                            return 4;
 
-                    }
-                } else {
-                    if (!dao.update(biometria, true)) {
+                        }
+                    } else if (!dao.update(biometria, true)) {
                         return 0;
                     }
-                }   break;
+                    break;
             }
 
         } else {
@@ -368,7 +385,7 @@ public class Nitgen {
         return digitalCapturada;
     }
 
-    public void loadBiometria(List<Biometria> list) {
+    public void loadBiometria(Boolean reload, List<Biometria> list) {
         if (load) {
             if (hardware) {
                 if (!open) {
@@ -386,15 +403,26 @@ public class Nitgen {
                 load = false;
                 device_code = device.DeviceInfo[0].DeviceID;
                 device_name = device.DeviceInfo[0].Name;
-                indexSearch.ClearDB();
-                for (int i = 0; i < list.size(); i++) {
-                    NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
-                    NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
-                    NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
-                    // list.add(i, (Biometria) new Dao().rebind(list.get(i)));
-                    textSavedFIR.TextFIR = list.get(i).getBiometria();
-                    inputFIR.SetTextFIR(textSavedFIR);
-                    indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                if (reload) {
+                    for (int i = 0; i < list.size(); i++) {
+                        indexSearch.RemoveUser(list.get(i).getPessoa().getId());
+                        NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
+                        NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                        NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
+                        textSavedFIR.TextFIR = list.get(i).getBiometria();
+                        inputFIR.SetTextFIR(textSavedFIR);
+                        indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                    }
+                } else {
+                    indexSearch.ClearDB();
+                    for (int i = 0; i < list.size(); i++) {
+                        NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
+                        NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                        NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
+                        textSavedFIR.TextFIR = list.get(i).getBiometria();
+                        inputFIR.SetTextFIR(textSavedFIR);
+                        indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                    }
                 }
                 setOpen(true);
             }

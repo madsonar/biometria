@@ -15,6 +15,7 @@ public class Close {
         List<BiometriaServidor> list = biometriaDao.pesquisaStatusPorComputador(getMacFilial().getId());
         if (!list.isEmpty()) {
             BiometriaServidor biometriaServidor = list.get(0);
+            biometriaServidor.setDataAtivo(null);
             biometriaServidor.setAtivo(false);
             Dao dao = new Dao();
             dao.update(biometriaServidor, true);

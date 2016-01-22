@@ -123,6 +123,20 @@ public class BiometriaDao extends DB {
         return new ArrayList();
     }
 
+    public List reloadListBiometria(Integer deviceNumber) {
+        try {
+            getEntityManager().clear();
+            Query query = getEntityManager().createNativeQuery("SELECT b.* FROM pes_biometria AS b WHERE b.is_ativo = true AND (b.ds_biometria IS NOT NULL OR B.ds_biometria <> '') AND B.dt_atualiza_aparelho" + deviceNumber + " IS NOT NULL ORDER BY B.id", Biometria.class);
+            List list = query.getResultList();
+            if (!list.isEmpty()) {
+                return list;
+            }
+        } catch (Exception e) {
+
+        }
+        return new ArrayList();
+    }
+
     public Integer total() {
         try {
             getEntityManager().clear();
@@ -135,6 +149,38 @@ public class BiometriaDao extends DB {
             return 0;
         }
         return 0;
+    }
+
+    public Boolean reload() {
+        try {
+            getEntityManager().getTransaction().begin();
+            Query query = getEntityManager().createNativeQuery("UPDATE pes_biometria SET dt_atualiza_aparelho1 = null, dt_atualiza_aparelho2 = null, dt_atualiza_aparelho3 = null, dt_atualiza_aparelho4 = null");
+            if (query.executeUpdate() == 0) {
+                getEntityManager().getTransaction().rollback();
+                return false;
+            }
+            getEntityManager().getTransaction().commit();
+        } catch (Exception e) {
+            getEntityManager().getTransaction().rollback();
+            return false;
+        }
+        return true;
+    }
+
+    public Boolean reload(Integer deviceNumber) {
+        try {
+            getEntityManager().getTransaction().begin();
+            Query query = getEntityManager().createNativeQuery("UPDATE pes_biometria SET dt_atualiza_aparelho" + deviceNumber + " = null");
+            if (query.executeUpdate() == 0) {
+                getEntityManager().getTransaction().rollback();
+                return false;
+            }
+            getEntityManager().getTransaction().commit();
+        } catch (Exception e) {
+            getEntityManager().getTransaction().rollback();
+            return false;
+        }
+        return true;
     }
 
 }
