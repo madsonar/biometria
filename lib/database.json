@@ -1,5 +1,5 @@
 {
-    "host": "192.168.1.100",
+    "host": "sindical.rtools.com.br",
     "port": "5432",
     "database": "ComercioRP",
     "password": "r#@tools"
