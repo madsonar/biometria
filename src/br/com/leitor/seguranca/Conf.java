@@ -17,7 +17,13 @@ public class Conf {
     private String brand;
     private String model;
     private String ip;
-    // HABILITA SOMENTE SE INSERIR O DEDO
+    /**
+     * Limpa base de dados
+     */
+    private Boolean local_db;
+    /**
+     * HABILITA SOMENTE SE INSERIR O DEDO
+     */
     private Boolean placed;
     private String filial;
     private String app;
@@ -38,6 +44,7 @@ public class Conf {
         this.model = "";
         this.ip = "";
         this.ip = "";
+        this.local_db = false;
         this.placed = false;
         this.filial = "";
         this.app = "";
@@ -51,13 +58,14 @@ public class Conf {
         this.ssl = false;
     }
 
-    public Conf(String client, Integer type, Integer device, String brand, String model, String ip, Boolean placed, String filial, String app, String key, String user, String password, String method, String action, Integer port, Boolean web_service, Boolean ssl) {
+    public Conf(String client, Integer type, Integer device, String brand, String model, String ip, Boolean local_db, Boolean placed, String filial, String app, String key, String user, String password, String method, String action, Integer port, Boolean web_service, Boolean ssl) {
         this.client = client;
         this.type = type;
         this.device = device;
         this.brand = brand;
         this.model = model;
         this.ip = ip;
+        this.local_db = local_db;
         this.placed = placed;
         this.filial = filial;
         this.app = app;
@@ -121,6 +129,13 @@ public class Conf {
                 logs.save("Conf Erro", "(String) ip: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
             }
             try {
+                local_db = jSONObject.getBoolean("local_db");
+            } catch (Exception e) {
+                if (placed == null) {
+                    logs.save("Conf Erro", "(Boolean) clear_db: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
+                }
+            }
+            try {
                 placed = jSONObject.getBoolean("placed");
             } catch (Exception e) {
                 logs.save("Conf Erro", "(Boolean) placed: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
@@ -133,7 +148,7 @@ public class Conf {
 
             try {
                 web_service = jSONObject.getBoolean("web_service");
-                if(web_service == null) {
+                if (web_service == null) {
                     return;
                 }
             } catch (Exception e) {
@@ -323,4 +338,13 @@ public class Conf {
     public void setSsl(Boolean ssl) {
         this.ssl = ssl;
     }
+
+    public Boolean getLocal_db() {
+        return local_db;
+    }
+
+    public void setLocal_db(Boolean local_db) {
+        this.local_db = local_db;
+    }
+
 }

@@ -62,11 +62,12 @@ public class Menu extends JFrame implements ActionListener {
     public String title;
     private Timer timer;
     private PopupMenu popupMenu;
-    private MenuItem aboutItem, exitItem, restart;
+    private MenuItem aboutItem, exitItem, restart, reiniciarDB;
     private Boolean started;
     private Boolean reload = true;
     private Boolean reloadListBiometria = false;
     private String startedDate = DataHoje.data();
+    private Boolean actionInstance;
 
     static {
         try {
@@ -128,6 +129,7 @@ public class Menu extends JFrame implements ActionListener {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
+        actionInstance = false;
         conf = new Conf();
         conf.loadJson();
         tipo = conf.getType();
@@ -176,7 +178,6 @@ public class Menu extends JFrame implements ActionListener {
             ActionListener actionListener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // setVisible(true);
                     about();
                 }
             };
@@ -202,6 +203,8 @@ public class Menu extends JFrame implements ActionListener {
             exitItem.addActionListener(this);
             restart = new MenuItem("Reiniciar");
             restart.addActionListener(this);
+            reiniciarDB = new MenuItem("Reiniciar DB");
+            reiniciarDB.addActionListener(this);
 
             //Add components to pop-up menu
             popupMenu.add(aboutItem);
@@ -211,6 +214,8 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.add(exitItem);
             popupMenu.addSeparator();
             popupMenu.add(restart);
+            popupMenu.addSeparator();
+            popupMenu.add(reiniciarDB);
             TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
             trayIcon.addActionListener(actionListener);
             trayIcon.setPopupMenu(popupMenu);
@@ -256,6 +261,9 @@ public class Menu extends JFrame implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (actionInstance) {
+                return;
+            }
             timer.setDelay(0);
             BiometriaAtualizaCatraca bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
             bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
@@ -313,8 +321,11 @@ public class Menu extends JFrame implements ActionListener {
                             }
                         }
                         new Dao().update(list.get(i), true);
-                    }  
+                    }
                     nitgen.loadBiometria(reloadListBiometria, list);
+                    if (!reloadListBiometria) {
+                        reloadListBiometria = true;
+                    }
                     nitgen.setLoad(false);
                 }
                 if (nitgen.getOpen()) {
@@ -406,6 +417,7 @@ public class Menu extends JFrame implements ActionListener {
             Close.confirm();
             System.exit(0);
         }
+        actionInstance = false;
         load();
         thread.start();
     }
@@ -429,13 +441,28 @@ public class Menu extends JFrame implements ActionListener {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
             initComponents();
-//            setLayout(null);
-//            setSize(320, 320);
-//            setLocationRelativeTo(null);
-//            setTitle("Leitor Biométrico - " + title);
-//            setIconImage(new ImageIcon(getClass().getResource("/images/finger.png")).getImage());
-//            add(barra);
         }
+        actionInstance = false;
+
+    }
+
+    public void reloadDB() {
+        Object[] options = {"Sim", "Não"};
+        int resposta = JOptionPane.showOptionDialog(null,
+                "Tem certeza que deseja limpar a base de dados? Isso pode levar alguns minutos!", "Mensagem do Programa",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                options, options[0]);
+        if (resposta == 0) {
+            try {
+                reloadListBiometria = false;
+                nitgen.removeDB();
+                reload = true;
+                listBiometria.isEmpty();
+            } catch (Exception ex) {
+                Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        actionInstance = false;
 
     }
 
@@ -445,8 +472,10 @@ public class Menu extends JFrame implements ActionListener {
         JComponent jc = null;
         try {
             jc = (JComponent) e.getSource();
+            actionInstance = true;
         } catch (Exception ex) {
             action = e.getActionCommand();
+            actionInstance = true;
         }
         if (jc == null && !action.isEmpty()) {
             switch (action) {
@@ -458,6 +487,9 @@ public class Menu extends JFrame implements ActionListener {
                     break;
                 case "Reiniciar":
                     restart();
+                    break;
+                case "Reiniciar DB":
+                    reloadDB();
                     break;
             }
         } else if (jc == ocultar) {
@@ -473,6 +505,7 @@ public class Menu extends JFrame implements ActionListener {
             nitgen.setLoad(true);
             getListBiometria();
         }
+        actionInstance = false;
     }
 
     private Runnable poll = new Runnable() {
@@ -579,8 +612,11 @@ public class Menu extends JFrame implements ActionListener {
             if (reloadListBiometria) {
                 listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
             } else {
-                listBiometria = new BiometriaDao().listBiometria();
-                reloadListBiometria = true;
+                if(nitgen != null) {
+                    if(!nitgen.getExistsDB()) {
+                        listBiometria = new BiometriaDao().listBiometria();                    
+                    }
+                }
             }
         }
         return listBiometria;

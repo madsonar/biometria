@@ -11,6 +11,8 @@ import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
 import com.nitgen.SDK.BSP.NBioBSPJNI;
 import com.nitgen.SDK.BSP.NBioBSPJNI.DEVICE_ENUM_INFO;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,7 @@ public class Nitgen {
     private NBioBSPJNI nBioBSP;
     private NBioBSPJNI.IndexSearch indexSearch;
     private NBioBSPJNI.DEVICE_ENUM_INFO device;
+    private NBioBSPJNI.DEVICE_INFO_EX device_info_ex;
     private Integer digitalCapturada;
     private String digitalCapturadaString;
     private Pessoa pessoa;
@@ -48,6 +51,15 @@ public class Nitgen {
             this.load = true;
             this.conf = new Conf();
             conf.loadJson();
+            try {
+                // FORCE LIMPEZA
+                if (!conf.getLocal_db()) {
+                    forceRemoveDB(true);
+                    // reload = false;
+                }
+            } catch (Exception e) {
+
+            }
         } catch (NoSuchFieldError | UnsatisfiedLinkError | Exception e) {
             Logs logs = new Logs();
             logs.save("menu", "Erro ao carregar DLL. " + e.getMessage());
@@ -65,6 +77,7 @@ public class Nitgen {
             this.nBioBSP.EnumerateDevice(this.device);
             this.indexSearch = this.nBioBSP.new IndexSearch();
             n = this.device.DeviceCount;
+            device_info_ex = this.device.DeviceInfo[0];
         } catch (NoSuchFieldError | UnsatisfiedLinkError | Exception e) {
             Logs logs = new Logs();
             logs.save("menu", "Erro ao carregar DLL. " + e.getMessage());
@@ -88,10 +101,10 @@ public class Nitgen {
 //        if (hardware) {
 //            for (int i = 0; i < device.DeviceCount; i++) {
 //                try {
-//                    int auto = device.DeviceInfo[i].AutoOn;
+//                    int auto =device_info_ex.AutoOn;
 //                    if (auto == 1) {
 //                    }
-//                    nBioBSP.OpenDevice(device.DeviceInfo[i].NameID, device.DeviceInfo[i].Instance);
+//                    nBioBSP.OpenDevice(device_info_ex.NameID,device_info_ex.Instance);
 //                } catch (Exception e) {
 //
 //                }
@@ -217,10 +230,10 @@ public class Nitgen {
                 case "nitgen":
                     for (int i = 0; i < device.DeviceCount; i++) {
                         try {
-                            int auto = device.DeviceInfo[i].AutoOn;
+                            int auto = device_info_ex.AutoOn;
                             if (auto == 1) {
                             }
-                            nBioBSP.OpenDevice(device.DeviceInfo[i].NameID, device.DeviceInfo[i].Instance);
+                            nBioBSP.OpenDevice(device_info_ex.NameID, device_info_ex.Instance);
                         } catch (Exception e) {
 
                         }
@@ -391,10 +404,10 @@ public class Nitgen {
                 if (!open) {
                     for (int i = 0; i < device.DeviceCount; i++) {
                         try {
-                            int auto = device.DeviceInfo[i].AutoOn;
+                            int auto = device_info_ex.AutoOn;
                             if (auto == 1) {
                             }
-                            nBioBSP.OpenDevice(device.DeviceInfo[i].NameID, device.DeviceInfo[i].Instance);
+                            nBioBSP.OpenDevice(device_info_ex.NameID, device_info_ex.Instance);
                         } catch (Exception e) {
 
                         }
@@ -406,15 +419,8 @@ public class Nitgen {
                 if (reload) {
                     for (int i = 0; i < list.size(); i++) {
                         indexSearch.RemoveUser(list.get(i).getPessoa().getId());
-                        NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
-                        NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
-                        NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
-                        textSavedFIR.TextFIR = list.get(i).getBiometria();
-                        inputFIR.SetTextFIR(textSavedFIR);
-                        indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                        saveDB();
                     }
-                } else {
-                    indexSearch.ClearDB();
                     for (int i = 0; i < list.size(); i++) {
                         NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
                         NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
@@ -422,9 +428,24 @@ public class Nitgen {
                         textSavedFIR.TextFIR = list.get(i).getBiometria();
                         inputFIR.SetTextFIR(textSavedFIR);
                         indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                        saveDB();
                     }
+                } else {
+                    if (!getExistsDB()) {
+                        for (int i = 0; i < list.size(); i++) {
+                            NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
+                            NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                            NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
+                            textSavedFIR.TextFIR = list.get(i).getBiometria();
+                            inputFIR.SetTextFIR(textSavedFIR);
+                            indexSearch.AddFIR(inputFIR, list.get(i).getPessoa().getId(), sampleInfo);
+                        }
+                        saveDB();
+                    } else {
+                        loadDB();
+                    }
+                    setOpen(true);
                 }
-                setOpen(true);
             }
         }
     }
@@ -495,7 +516,7 @@ public class Nitgen {
         if (nBioBSP != null) {
             for (int i = 0; i < device.DeviceCount; i++) {
                 try {
-                    nBioBSP.CloseDevice(device.DeviceInfo[i].NameID, device.DeviceInfo[i].Instance);
+                    nBioBSP.CloseDevice(device_info_ex.NameID, device_info_ex.Instance);
                 } catch (Exception e) {
 
                 }
@@ -671,5 +692,151 @@ public class Nitgen {
             var1 = complemento + var1;
         }
         return (var1);
+    }
+
+    public Integer size() {
+        Integer deviceNumer = this.device.DeviceCount;
+        try {
+            return indexSearch.GetDBCount(0);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public Boolean isEmpty() {
+        Integer deviceNumer = null;
+        if (device_info_ex.Reserved1 != 0) {
+            deviceNumer = device_info_ex.Reserved1;
+        } else if (device_info_ex.Reserved2 != 0) {
+            deviceNumer = device_info_ex.Reserved2;
+        } else if (device_info_ex.Reserved3 != 0) {
+            deviceNumer = device_info_ex.Reserved3;
+        } else if (device_info_ex.Reserved4 != 0) {
+            deviceNumer = device_info_ex.Reserved4;
+        } else if (device_info_ex.Reserved5 != 0) {
+            deviceNumer = device_info_ex.Reserved5;
+        } else if (device_info_ex.Reserved6 != 0) {
+            deviceNumer = device_info_ex.Reserved6;
+        } else if (device_info_ex.Reserved7 != 0) {
+            deviceNumer = device_info_ex.Reserved7;
+        } else if (device_info_ex.Reserved7 != 0) {
+            deviceNumer = device_info_ex.Reserved7;
+        }
+        try {
+            Integer error = indexSearch.GetDBCount(deviceNumer);
+            return false;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Boolean getExistsDB() {
+        if (conf.getLocal_db()) {
+            try {
+                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                return f.exists();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public Boolean removeDB() {
+        return forceRemoveDB(false);
+    }
+
+    public final Boolean forceRemoveDB(Boolean force) {
+        if (conf.getLocal_db()) {
+            try {
+                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                boolean sucess = f.delete();
+                if (sucess) {
+                    indexSearch.ClearDB();
+                }
+                return sucess;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        if (force) {
+            try {
+                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                boolean sucess = f.delete();
+                if (sucess) {
+                    indexSearch.ClearDB();
+                }
+                return sucess;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getPath() {
+        String path = "";
+        try {
+            path = new File(".").getCanonicalPath();
+        } catch (IOException ex) {
+            return null;
+        }
+        return path;
+    }
+
+    private String getUserPath() {
+        String path = "";
+        String os_name = Property.getOSName();
+        String app_data = System.getenv("APPDATA");
+        if (os_name.toLowerCase().contains("windows")) {
+            return app_data;
+        } else if (os_name.toLowerCase().contains("linux")) {
+        } else if (os_name.toLowerCase().contains("centos")) {
+        }
+        try {
+        } catch (Exception ex) {
+            return null;
+        }
+        return path;
+    }
+
+    private void saveDB() {
+        if (conf.getLocal_db()) {
+            try {
+                /**
+                 * A base ISBB deve ficar sempre no user home, motivo, se
+                 * houverem mais de uma biometria todos os leitores poderão
+                 * acessar o mesmo caminho e salvar/carregar a base de dados.
+                 */
+                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/");
+                if (!f.exists()) {
+                    f.mkdirs();
+                }
+                String szSavePath = f.getCanonicalPath() + "/data" + ".ISDB";
+                indexSearch.SaveDB(szSavePath);
+
+                if (checkError()) {
+                    return;
+                }
+
+            } catch (Exception e) {
+                e.getMessage();
+            }
+        }
+    }
+
+    private void loadDB() {
+        if (conf.getLocal_db()) {
+            try {
+                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/");
+                if (!f.exists()) {
+                    f.mkdirs();
+                }
+                String szSavePath = f.getCanonicalPath() + "/data" + ".ISDB";
+                indexSearch.LoadDB(szSavePath);
+            } catch (Exception e) {
+                e.getMessage();
+            }
+        }
     }
 }

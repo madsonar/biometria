@@ -1,7 +1,0 @@
-Nenhum dispostivo encontrado
-Nenhum dispostivo encontrado
-Nenhum dispostivo encontrado
-Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load AMD 64-bit .dll on a IA 32-bit platform
-Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load AMD 64-bit .dll on a IA 32-bit platform
-Erro ao carregar DLL. C:\Windows\System32\NBioBSPJNI.dll: Can't load AMD 64-bit .dll on a IA 32-bit platform
-Erro ao carregar DLL. m_hNBioBSP
