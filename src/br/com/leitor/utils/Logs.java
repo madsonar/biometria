@@ -74,7 +74,7 @@ public class Logs {
 
     public String getPath() {
         if (path == null) {
-            path = Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/logs/";
+            path = Path.getUserPath() + "/Rtools/" + conf.getBrand() + "/" + conf.getModel() + "/logs/";
             try {
                 File fp = new File(path);
                 if (!fp.exists()) {
