@@ -733,7 +733,7 @@ public class Nitgen {
     public Boolean getExistsDB() {
         if (conf.getLocal_db()) {
             try {
-                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                File f = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/data.ISDB");
                 return f.exists();
             } catch (Exception e) {
                 return false;
@@ -749,7 +749,7 @@ public class Nitgen {
     public final Boolean forceRemoveDB(Boolean force) {
         if (conf.getLocal_db()) {
             try {
-                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                File f = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/data.ISDB");
                 boolean sucess = f.delete();
                 if (sucess) {
                     indexSearch.ClearDB();
@@ -761,7 +761,7 @@ public class Nitgen {
         }
         if (force) {
             try {
-                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/data.ISDB");
+                File f = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/data.ISDB");
                 boolean sucess = f.delete();
                 if (sucess) {
                     indexSearch.ClearDB();
@@ -784,22 +784,6 @@ public class Nitgen {
         return path;
     }
 
-    private String getUserPath() {
-        String path = "";
-        String os_name = Property.getOSName();
-        String app_data = System.getenv("APPDATA");
-        if (os_name.toLowerCase().contains("windows")) {
-            return app_data;
-        } else if (os_name.toLowerCase().contains("linux")) {
-        } else if (os_name.toLowerCase().contains("centos")) {
-        }
-        try {
-        } catch (Exception ex) {
-            return null;
-        }
-        return path;
-    }
-
     private void saveDB() {
         if (conf.getLocal_db()) {
             try {
@@ -808,7 +792,7 @@ public class Nitgen {
                  * houverem mais de uma biometria todos os leitores poderão
                  * acessar o mesmo caminho e salvar/carregar a base de dados.
                  */
-                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/");
+                File f = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/");
                 if (!f.exists()) {
                     f.mkdirs();
                 }
@@ -828,7 +812,7 @@ public class Nitgen {
     private void loadDB() {
         if (conf.getLocal_db()) {
             try {
-                File f = new File(getUserPath() + "/rtools/biometria/nitgen/hamsterdx/");
+                File f = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/");
                 if (!f.exists()) {
                     f.mkdirs();
                 }

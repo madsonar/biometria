@@ -13,6 +13,7 @@ public class Logs {
     private String current_date = null;
     private File file = null;
     private String path;
+    private Conf conf;
 
     protected String create_file(String filename) {
         try {
@@ -42,9 +43,12 @@ public class Logs {
     }
 
     public String save(String location, String content) {
+        conf = new Conf();
+        conf.loadJson();
         try {
             location = location.toLowerCase();
             location = location.replace(" ", "_");
+            location = location.replace(">", "_");
             create_file(location);
             if (file != null && file.exists()) {
 
@@ -70,13 +74,12 @@ public class Logs {
 
     public String getPath() {
         if (path == null) {
+            path = Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/logs/";
             try {
-                path = new File(".").getCanonicalPath();
-                File fp = new File(path + "\\logs\\");
+                File fp = new File(path);
                 if (!fp.exists()) {
-                    fp.mkdir();
+                    fp.mkdirs();
                 }
-                path = path + "\\logs\\";
             } catch (Exception ex) {
                 Logger.getLogger(Conf.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -14,9 +14,12 @@ import br.com.leitor.seguranca.MacFilial;
 import br.com.leitor.utils.DataHoje;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
+import br.com.leitor.utils.Path;
+import br.com.leitor.utils.Property;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
@@ -26,6 +29,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -62,7 +67,7 @@ public class Menu extends JFrame implements ActionListener {
     public String title;
     private Timer timer;
     private PopupMenu popupMenu;
-    private MenuItem aboutItem, exitItem, restart, reiniciarDB;
+    private MenuItem aboutItem, exitItem, restart, reiniciarDB, folderLogs;
     private Boolean started;
     private Boolean reload = true;
     private Boolean reloadListBiometria = false;
@@ -205,6 +210,8 @@ public class Menu extends JFrame implements ActionListener {
             restart.addActionListener(this);
             reiniciarDB = new MenuItem("Reiniciar DB");
             reiniciarDB.addActionListener(this);
+            folderLogs = new MenuItem("Logs");
+            folderLogs.addActionListener(this);
 
             //Add components to pop-up menu
             popupMenu.add(aboutItem);
@@ -216,6 +223,8 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.add(restart);
             popupMenu.addSeparator();
             popupMenu.add(reiniciarDB);
+            popupMenu.addSeparator();
+            popupMenu.add(folderLogs);
             TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
             trayIcon.addActionListener(actionListener);
             trayIcon.setPopupMenu(popupMenu);
@@ -491,6 +500,17 @@ public class Menu extends JFrame implements ActionListener {
                 case "Reiniciar DB":
                     reloadDB();
                     break;
+                case "Logs":
+                    try {
+                        Desktop desktop = Desktop.getDesktop();
+                        File dirToOpen = new File(Path.getUserPath() + "/rtools/" + conf.getBrand() + "/" + conf.getModel() + "/logs/");
+                        desktop.open(dirToOpen);
+                    } catch (IllegalArgumentException iae) {
+                        System.out.println("File Not Found");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
             }
         } else if (jc == ocultar) {
             // super.dispose();
@@ -611,11 +631,9 @@ public class Menu extends JFrame implements ActionListener {
         if (listBiometria.isEmpty()) {
             if (reloadListBiometria) {
                 listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
-            } else {
-                if(nitgen != null) {
-                    if(!nitgen.getExistsDB()) {
-                        listBiometria = new BiometriaDao().listBiometria();                    
-                    }
+            } else if (nitgen != null) {
+                if (!nitgen.getExistsDB()) {
+                    listBiometria = new BiometriaDao().listBiometria();
                 }
             }
         }

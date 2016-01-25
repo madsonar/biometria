@@ -58,11 +58,16 @@ public class DB {
                     }
                     entidade = emf.createEntityManager();
                 } catch (Exception e) {
+                    if (entidade == null) {
+                        Logs logs = new Logs();
+                        logs.save("DB", "Erro ao conectar a base de dados, verifique o arquivo de configuração (database.json)!");
+                        System.exit(0);
+                    }
                     return null;
                 }
             } else {
                 Logs logs = new Logs();
-                logs.save("DB -> Erro", "Cliente não encontrado!");
+                logs.save("DB", "Cliente não encontrado!");
                 System.exit(0);
             }
         }
