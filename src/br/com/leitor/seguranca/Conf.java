@@ -44,7 +44,7 @@ public class Conf {
         this.model = "";
         this.ip = "";
         this.ip = "";
-        this.local_db = false;
+        this.local_db = true;
         this.placed = false;
         this.filial = "";
         this.app = "";
