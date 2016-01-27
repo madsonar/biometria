@@ -9,6 +9,7 @@ import br.com.leitor.pessoa.dao.BiometriaDao;
 import br.com.leitor.pessoa.dao.BiometriaErroDao;
 import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
+import br.com.leitor.sistema.conf.Device;
 import com.nitgen.SDK.BSP.NBioBSPJNI;
 import com.nitgen.SDK.BSP.NBioBSPJNI.DEVICE_ENUM_INFO;
 import java.io.File;
@@ -38,6 +39,8 @@ public class Nitgen {
     private Integer deviceNumber;
     private Integer device_start;
     private Conf conf;
+    private Boolean STYLE_INVISIBLE;
+    private Device confDevice;
 
     public Nitgen() throws Exception {
         try {
@@ -51,6 +54,8 @@ public class Nitgen {
             this.load = true;
             this.conf = new Conf();
             conf.loadJson();
+            confDevice = new Device();
+            this.STYLE_INVISIBLE = false;
             try {
                 // FORCE LIMPEZA
                 if (!conf.getLocal_db()) {
@@ -239,6 +244,14 @@ public class Nitgen {
                         }
                     }
                     NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
+                    // TESTAR ESTA OPÇÃO ABAIXO
+                    // INICIA
+                    // NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
+                    // REMOVE TELA DE BOAS VINDAS
+                    // NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                    // option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.NO_WELCOME;
+                    // nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.ENROLL, hFIR, -1, null, option);
+                    // TERMINA
                     nBioBSP.Enroll(hFIR, null);
                     if (checkError()) {
                         if (nBioBSP.GetErrorCode() == NBioBSPJNI.ERROR.NBioAPIERROR_FUNCTION_FAIL) {
@@ -456,10 +469,14 @@ public class Nitgen {
         Map<Integer, Integer> map = new HashMap<Integer, Integer>();
         // VERFICICA SE O DEDO ESTA SOBRE O SENSOR
         if (!placed()) {
-            //NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
-            //option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.INVISIBLE;
-            //nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.VERIFY, fir_handle, -1, null, option);
-            nBioBSP.Capture(fir_handle);
+            if (STYLE_INVISIBLE && confDevice.getInvisible()) {
+                NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
+                option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.INVISIBLE;
+                nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.VERIFY, fir_handle, -1, null, option);
+            } else {
+                nBioBSP.Capture(fir_handle);
+                STYLE_INVISIBLE = true;
+            }
             //Obtem a digital capturada em modo texto
             Integer id = null;
             Integer digitalCapturada = 0;

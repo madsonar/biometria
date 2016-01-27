@@ -1,0 +1,6 @@
+# Invisivel
+
+invisible
+# Default true (Boolean)
+# Opção usada para leitura da biometria
+# Não fica mostrando o dispositivo ne tela

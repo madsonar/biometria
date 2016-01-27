@@ -15,7 +15,6 @@ import br.com.leitor.utils.DataHoje;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
 import br.com.leitor.utils.Path;
-import br.com.leitor.utils.Property;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
@@ -226,7 +225,7 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.addSeparator();
             popupMenu.add(folderLogs);
             TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
-            trayIcon.addActionListener(actionListener);
+            trayIcon.addActionListener(actionListener);            
             trayIcon.setPopupMenu(popupMenu);
 
             try {
