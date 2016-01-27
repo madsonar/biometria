@@ -203,29 +203,34 @@ public class Menu extends JFrame implements ActionListener {
             aboutItem.addActionListener(this);
             CheckboxMenuItem cb1 = new CheckboxMenuItem("Atualizar");
             cb1.setEnabled(false);
-            exitItem = new MenuItem("Sair");
-            exitItem.addActionListener(this);
             restart = new MenuItem("Reiniciar");
             restart.addActionListener(this);
-            reiniciarDB = new MenuItem("Reiniciar DB");
-            reiniciarDB.addActionListener(this);
+            if (tipo == 1) {
+                reiniciarDB = new MenuItem("Reiniciar DB");
+                reiniciarDB.addActionListener(this);
+            }
             folderLogs = new MenuItem("Logs");
             folderLogs.addActionListener(this);
+            exitItem = new MenuItem("Sair");
+            exitItem.addActionListener(this);
 
             //Add components to pop-up menu
             popupMenu.add(aboutItem);
             popupMenu.addSeparator();
             popupMenu.add(cb1);
             popupMenu.addSeparator();
-            popupMenu.add(exitItem);
-            popupMenu.addSeparator();
             popupMenu.add(restart);
             popupMenu.addSeparator();
-            popupMenu.add(reiniciarDB);
-            popupMenu.addSeparator();
+            if (tipo == 1) {
+                popupMenu.add(reiniciarDB);                
+                popupMenu.addSeparator();
+            }
             popupMenu.add(folderLogs);
+            popupMenu.addSeparator();
+            popupMenu.add(exitItem);
+            popupMenu.addSeparator();
             TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
-            trayIcon.addActionListener(actionListener);            
+            trayIcon.addActionListener(actionListener);
             trayIcon.setPopupMenu(popupMenu);
 
             try {

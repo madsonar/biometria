@@ -1,3 +1,5 @@
 {
-    "invisible": true
+    "invisible": true,
+    "welcome": false,
+    "disabled_finger": []
 }

@@ -102,108 +102,6 @@ public class Nitgen {
      *
      * @return
      */
-//    public Integer readSave() {
-//        if (hardware) {
-//            for (int i = 0; i < device.DeviceCount; i++) {
-//                try {
-//                    int auto =device_info_ex.AutoOn;
-//                    if (auto == 1) {
-//                    }
-//                    nBioBSP.OpenDevice(device_info_ex.NameID,device_info_ex.Instance);
-//                } catch (Exception e) {
-//
-//                }
-//            }
-//            BiometriaDao biometriaDao = new BiometriaDao();
-//            biometria = new Biometria();
-//            biometria = biometriaDao.pesquisaBiometriaPorPessoa(pessoa.getId());
-//            Dao dao = new Dao();
-//            int userID;
-//            try {
-//                userID = pessoa.getId();
-//            } catch (NumberFormatException e) {
-//                return 0;
-//            }
-//            if (biometria == null) {
-//                biometria = new Biometria();
-//                biometria.setLancamento(DataHoje.dataHoje());
-//                biometria.setPessoa(pessoa);
-//                biometria.setAtivo(true);
-//                if (!dao.save(biometria, true)) {
-//                    return 0;
-//                }
-//            } else {
-//                biometria = (Biometria) dao.rebind(biometria);
-//            }
-//            NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
-//            nBioBSP.Enroll(hFIR, null);
-//            if (checkError()) {
-//                if (nBioBSP.GetErrorCode() == NBioBSPJNI.ERROR.NBioAPIERROR_FUNCTION_FAIL) {
-//                    nBioBSP.Capture(hFIR);
-//                }
-//            }
-//            NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
-//            NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
-//            inputFIR.SetFIRHandle(hFIR);
-//            NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
-//            //Pega a string de caracteres a partir do handle capturado
-//            //Declara o input_fir para fazer a comparação da digital
-//            inputFIR.SetTextFIR(textSavedFIR);
-//            NBioBSPJNI.IndexSearch.FP_INFO fpInfo = indexSearch.new FP_INFO();
-//            /* Faz o processo de identificação:
-//             * - Primeiro parametro: digital capturada no momento
-//             * - Segundo parametro: nivel de segurança. varia de 1 a 9. 5 é default.
-//             * - Terceiro parametro: informação do usuário
-//             * */
-//            indexSearch.Identify(inputFIR, 5, fpInfo);
-//            indexSearch.AddFIR(inputFIR, userID, sampleInfo);
-//
-//            if (checkError()) {
-//                return 0;
-//            }
-//
-//            this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
-//            this.digitalCapturadaString = textSavedFIR.TextFIR;
-//            nBioBSP.CloseDevice(device.DeviceInfo[0].NameID, device.DeviceInfo[0].Instance);
-//            if (this.digitalCapturadaString == null) {
-//                biometria.setAtivo(false);
-//                dao.update(biometria, true);
-//                return 2;
-//            }
-//            biometria.setBiometria(digitalCapturadaString);
-//            if (!biometria.isAtivo()) {
-//                Object[] options = {"Sim", "Não"};
-//                int resposta = JOptionPane.showOptionDialog(null,
-//                        "Tem certeza que reativar esta biometria?", "Mensagem do Programa",
-//                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-//                        options, options[0]);
-//                if (resposta == 0) {
-//                    List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
-//                    if (!list.isEmpty()) {
-//                        biometria.setAtivo(true);
-//                        if (!dao.update(biometria, true)) {
-//                            return 0;
-//                        }
-//                    }
-//                    // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
-//                    return 4;
-//
-//                }
-//            } else {
-//                if (!dao.update(biometria, true)) {
-//                    return 0;
-//                }
-//            }
-//
-//            Close.clear();
-//            hFIR.dispose();
-//            hFIR = null;
-//        } else {
-//            return 3;
-//        }
-//
-//        return 1;
-//    }
     public Integer readSave() {
         if (hardware) {
             BiometriaDao biometriaDao = new BiometriaDao();
@@ -244,15 +142,56 @@ public class Nitgen {
                         }
                     }
                     NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
-                    // TESTAR ESTA OPÇÃO ABAIXO
-                    // INICIA
-                    // NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
-                    // REMOVE TELA DE BOAS VINDAS
-                    // NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
-                    // option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.NO_WELCOME;
-                    // nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.ENROLL, hFIR, -1, null, option);
-                    // TERMINA
-                    nBioBSP.Enroll(hFIR, null);
+                    NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
+                    // TELA DE BOAS VINDAS HABILITADA
+                    if (!confDevice.getWelcome()) {
+                        option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.NO_WELCOME;
+                    }
+                    if (!confDevice.getDisabled_finger().isEmpty()) {
+                        try {
+                            for (int i = 0; i < confDevice.getDisabled_finger().size(); i++) {
+                                Integer finger_number = Integer.parseInt(confDevice.getDisabled_finger().get(i).toString());
+                                    switch (finger_number) {
+                                    case 1:
+                                        option.DisableFingerForEnroll0 = 1;
+                                        break;
+                                    case 2:
+                                        option.DisableFingerForEnroll1 = 1;
+                                        break;
+                                    case 3:
+                                        option.DisableFingerForEnroll2 = 1;
+                                        break;
+                                    case 4:
+                                        option.DisableFingerForEnroll3 = 1;
+                                        break;
+                                    case 5:
+                                        option.DisableFingerForEnroll4 = 1;
+                                        break;
+                                    case 6:
+                                        option.DisableFingerForEnroll5 = 1;
+                                        break;
+                                    case 7:
+                                        option.DisableFingerForEnroll6 = 1;
+                                        break;
+                                    case 8:
+                                        option.DisableFingerForEnroll7 = 1;
+                                        break;
+                                    case 9:
+                                        option.DisableFingerForEnroll8 = 1;
+                                        break;
+                                    default:
+                                        option.DisableFingerForEnroll9 = 1;
+                                        break;
+                                }
+                            }
+                            
+                        } catch (Exception e) {
+                            
+                        }
+                    }
+                    nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.ENROLL, hFIR, -1, null, option);
+                    // MÉDOTO ANTIGO
+                    // nBioBSP.Enroll(hFIR, null);
                     if (checkError()) {
                         if (nBioBSP.GetErrorCode() == NBioBSPJNI.ERROR.NBioAPIERROR_FUNCTION_FAIL) {
                             nBioBSP.Capture(hFIR);
@@ -391,7 +330,7 @@ public class Nitgen {
         NBioBSPJNI.Export.DATA exportData = exportEngine.new DATA();
         NBioBSPJNI.WINDOW_OPTION winOption = nBioBSP.new WINDOW_OPTION();
         NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
-        StringBuilder digitalCapturada = new StringBuilder();
+        StringBuilder digitalCapturada2 = new StringBuilder();
 
         try {
 
@@ -402,13 +341,13 @@ public class Nitgen {
             if (nBioBSP.IsErrorOccured() == false) {
                 inputFIR.SetFIRHandle(hSavedFIR);
                 exportEngine.ExportFIR(inputFIR, exportData, NBioBSPJNI.EXPORT_MINCONV_TYPE.FIM01_HV);
-                digitalCapturada.append(convertArrayByteToHex(exportData.FingerData[0].Template[0].Data));
+                digitalCapturada2.append(convertArrayByteToHex(exportData.FingerData[0].Template[0].Data));
             }
         } catch (Exception ex) {
             throw new Exception("Erro ao capturar digital !", ex);
         }
         System.out.println(nBioBSP.GetErrorCode());
-        return digitalCapturada;
+        return digitalCapturada2;
     }
 
     public void loadBiometria(Boolean reload, List<Biometria> list) {
