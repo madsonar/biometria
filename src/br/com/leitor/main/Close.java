@@ -1,4 +1,4 @@
-package br.com.leitor.main;
+package br.com.leitor.main; 
 
 import br.com.leitor.dao.Dao;
 import br.com.leitor.pessoa.BiometriaServidor;
