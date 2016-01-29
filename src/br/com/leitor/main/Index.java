@@ -13,6 +13,7 @@ import br.com.leitor.utils.BlockInterface;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Mac;
 import br.com.leitor.utils.Ping;
+import br.com.leitor.utils.Preloader;
 import br.com.leitor.utils.Session;
 import br.com.leitor.utils.WebService;
 import java.awt.GridLayout;
@@ -38,11 +39,13 @@ public final class Index extends JFrame implements ActionListener {
     private JLabel lblPassword;
     private JPasswordField txtPassword;
     private GridLayout grid;
+    private final Preloader preloader;
+    private final Conf conf;
 
     public static void main(String args[]) {
-        Conf conf = new Conf();
-        conf.loadJson();
-        Block.TYPE = "" + conf.getType();
+        Conf confx = new Conf();
+        confx.loadJson();
+        Block.TYPE = "" + confx.getType();
         Ping.execute();
         if (!Block.registerInstance()) {
             // instance already running.
@@ -61,6 +64,15 @@ public final class Index extends JFrame implements ActionListener {
     }
 
     public Index() {
+        conf = new Conf();
+        conf.loadJson();
+        Block.TYPE = "" + conf.getType();
+        preloader = new Preloader();
+        preloader.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+        preloader.setAppStatus("Iniciando...");
+        preloader.setShowIcon(true);
+        preloader.setWaitingStarted(true);
+        preloader.show();
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -68,9 +80,8 @@ public final class Index extends JFrame implements ActionListener {
                 System.exit(0);
             }
         });
-        Conf conf = new Conf();
-        conf.loadJson();
         BiometriaDao biometriaDao = new BiometriaDao();
+        preloader.reloadStatus("Verificando se computador é registrado...");
         if (conf.getType().equals(2)) {
             String mac = Mac.getInstance();
             if (conf.getWeb_service()) {
@@ -110,9 +121,7 @@ public final class Index extends JFrame implements ActionListener {
             new BiometriaDao().reload(conf.getDevice());
         }
         Close.clear();
-        // PreloaderDialog pd = new PreloaderDialog();
-        // pd.show("Iniciando");
-        // pd.hide();
+        preloader.hide();
         new Menu().setVisible(false);
     }
 

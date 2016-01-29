@@ -15,6 +15,7 @@ import br.com.leitor.utils.DataHoje;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
 import br.com.leitor.utils.Path;
+import br.com.leitor.utils.Preloader;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
@@ -72,6 +73,7 @@ public class Menu extends JFrame implements ActionListener {
     private Boolean reloadListBiometria = false;
     private String startedDate = DataHoje.data();
     private Boolean actionInstance;
+    public Preloader preloader;
 
     static {
         try {
@@ -104,13 +106,8 @@ public class Menu extends JFrame implements ActionListener {
             }
         });
         started = false;
+        preloader = new Preloader();
         initComponents();
-        //setLayout(null);
-        //setSize(320, 320);
-        //setLocationRelativeTo(null);
-        //setTitle("Leitor Biométrico - " + title);
-        // setIconImage(new ImageIcon(getClass().getResource("/images/finger.png")).getImage());
-        //add(barra);
     }
 
     public void close() {
@@ -133,20 +130,32 @@ public class Menu extends JFrame implements ActionListener {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
-        actionInstance = false;
         conf = new Conf();
         conf.loadJson();
+        preloader.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+        preloader.setAppStatus("Verificando dispostivo...");
+        preloader.setShowIcon(true);
+        preloader.setWaitingStarted(true);
+        preloader.show();
+        preloader.hide();
+        actionInstance = false;
         tipo = conf.getType();
         // tipo = "gravar";
         listBiometria = new ArrayList();
-        if (tipo == 1) {
-            listBiometria = getListBiometria();
-        }
         try {
             nitgen = new Nitgen();
         } catch (Exception ex) {
             Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
+        if (tipo == 1) {
+            if (!nitgen.getExistsDB()) {
+                preloader.reloadStatus("Carregando base de dados...");
+            } else {
+                preloader.reloadStatus("Atualizando base de dados...");
+            }
+            listBiometria = getListBiometria();
+        }
+        preloader.hide();
         if (!started) {
             Container tela = getContentPane();
             tela.setLayout(null);
@@ -222,7 +231,7 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.add(restart);
             popupMenu.addSeparator();
             if (tipo == 1) {
-                popupMenu.add(reiniciarDB);                
+                popupMenu.add(reiniciarDB);
                 popupMenu.addSeparator();
             }
             popupMenu.add(folderLogs);
@@ -335,7 +344,21 @@ public class Menu extends JFrame implements ActionListener {
                         }
                         new Dao().update(list.get(i), true);
                     }
+                    Preloader p = new Preloader();
+                    p.setMinModal(true);
+                    p.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+                    p.setAppFrameIcon("download.png");
+                    p.setWaitingStarted(false);
+                    if (reloadListBiometria) {
+                        p.setAppTitle("Recarregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                        p.setAppStatus("Recarregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                    } else {
+                        p.setAppTitle("Carregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                        p.setAppStatus("Carregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                    }
+                    p.show();
                     nitgen.loadBiometria(reloadListBiometria, list);
+                    p.hide();                    
                     if (!reloadListBiometria) {
                         reloadListBiometria = true;
                     }
