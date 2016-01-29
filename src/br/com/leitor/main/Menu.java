@@ -348,16 +348,17 @@ public class Menu extends JFrame implements ActionListener {
                     p.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
                     p.setWaitingStarted(false);
                     if (reloadListBiometria) {
-                        p.setAppTitle("Recarregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
-                        p.setAppStatus("Recarregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                        p.setAppTitle("Recarregando base, isto pode levar alguns minutos...aguarde.");
+                        p.setAppStatus("Recarregando base, isto pode levar alguns minutos...aguarde.");
                     } else {
-                        p.setAppStatus("Carregando base de dados, isto pode levar alguns minutos...aguarde, não feche a aplicação.");
+                        p.setAppTitle("Carregando base, isto pode levar alguns minutos...aguarde.");
+                        p.setAppStatus("Carregando base, isto pode levar alguns minutos...aguarde.");
                     }
                     p.show();
                     // add(p.getFrame());
                     nitgen.loadBiometria(reloadListBiometria, list);
                     // remove(p.getFrame());
-                    p.hide();                    
+                    p.hide();
                     if (!reloadListBiometria) {
                         reloadListBiometria = true;
                     }
