@@ -476,6 +476,8 @@ public class Menu extends JFrame implements ActionListener {
             } catch (Exception ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
+            timer.stop();
+            listBiometria.clear();
             initComponents();
         }
         actionInstance = false;
@@ -493,7 +495,7 @@ public class Menu extends JFrame implements ActionListener {
                 reloadListBiometria = false;
                 nitgen.removeDB();
                 reload = true;
-                listBiometria.isEmpty();
+                listBiometria.clear();
             } catch (Exception ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
