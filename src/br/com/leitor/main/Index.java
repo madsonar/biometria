@@ -6,6 +6,7 @@ import br.com.leitor.pessoa.dao.BiometriaDao;
 import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
 import br.com.leitor.seguranca.dao.MacFilialDao;
+import br.com.leitor.sistema.conf.Device;
 import br.com.leitor.usuario.Usuario;
 import br.com.leitor.usuario.dao.UsuarioDao;
 import br.com.leitor.utils.Block;
@@ -15,7 +16,6 @@ import br.com.leitor.utils.Mac;
 import br.com.leitor.utils.Ping;
 import br.com.leitor.utils.Preloader;
 import br.com.leitor.utils.Session;
-import br.com.leitor.utils.WebService;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +30,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import rtools.WSStatus;
+import rtools.WebService;
 
 public final class Index extends JFrame implements ActionListener {
 
@@ -80,13 +82,37 @@ public final class Index extends JFrame implements ActionListener {
                 System.exit(0);
             }
         });
-        BiometriaDao biometriaDao = new BiometriaDao();
         preloader.reloadStatus("Verificando se computador é registrado...");
+        Device device = new Device();
+        device.loadJson();
+        WebService webService = new WebService();
+        webService.GET("autenticar_dispositivo.jsf", "", "");
+        WSStatus wSStatus = webService.wSStatus();
+        if (wSStatus.getCodigo() != 0) {
+            JOptionPane.showMessageDialog(null,
+                    wSStatus.getDescricao(),
+                    "Validação",
+                    JOptionPane.WARNING_MESSAGE);
+            Logs logs = new Logs();
+            logs.save("index", wSStatus.getDescricao());
+            System.exit(0);
+            return;
+        }
         if (conf.getType().equals(2)) {
             String mac = Mac.getInstance();
             if (conf.getWeb_service()) {
-                Object result = WebService.GET("web_service.jsf", "", "");
-                // http://localhost:8080/Sindical/web_service.jsf?client=Sindical&user=teste&password=123456&app=teste&key=123456&&method=GET&action=biometria
+                webService.PUT("biometria_habilitar.jsf", "", "habilitar=true");
+                wSStatus = webService.wSStatus();
+                if (wSStatus == null || wSStatus.getCodigo() != 0) {
+                    JOptionPane.showMessageDialog(null,
+                            wSStatus.getDescricao(),
+                            "Validação",
+                            JOptionPane.WARNING_MESSAGE);
+                    Logs logs = new Logs();
+                    logs.save("index", wSStatus.getDescricao());
+                    System.exit(0);
+                    return;
+                }
             } else {
                 MacFilialDao macFilialDao = new MacFilialDao();
                 MacFilial macFilial = macFilialDao.findMacFilial(mac);
@@ -100,6 +126,7 @@ public final class Index extends JFrame implements ActionListener {
                     System.exit(0);
                     return;
                 }
+                BiometriaDao biometriaDao = new BiometriaDao();
                 List<BiometriaServidor> list = biometriaDao.pesquisaStatusPorComputador(macFilial.getId());
                 Dao dao = new Dao();
                 if (!list.isEmpty()) {

@@ -16,6 +16,9 @@ import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
 import br.com.leitor.utils.Path;
 import br.com.leitor.utils.Preloader;
+import br.com.leitor.webservice.classes.WSBiometria;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
@@ -48,6 +51,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import rtools.WSStatus;
+import rtools.WebService;
 
 public class Menu extends JFrame implements ActionListener {
 
@@ -318,31 +323,63 @@ public class Menu extends JFrame implements ActionListener {
                 }
                 new Dao().update(bac, true);
             }
+            WebService webService = new WebService();
             if (nitgen.getHardware()) {
                 if (reload) {
                     reload = false;
                     nitgen.setLoad(true);
                     List<Biometria> list = getListBiometria();
+                    if (conf.getWeb_service()) {
+                        webService.param("device_number", conf.getDevice());
+                    }
+                    String codigo_biometria = "";
+                    int x = 0;
                     for (int i = 0; i < list.size(); i++) {
+                        Boolean next = false;
                         if (null != conf.getDevice()) {
                             switch (conf.getDevice()) {
                                 case 1:
-                                    list.get(i).setDataAtualizacaoAparelho1(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho1(null);
+                                    }
                                 case 2:
-                                    list.get(i).setDataAtualizacaoAparelho2(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho2(null);
+                                    }
                                 case 3:
-                                    list.get(i).setDataAtualizacaoAparelho3(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho3(null);
+                                    }
                                 case 4:
-                                    list.get(i).setDataAtualizacaoAparelho4(null);
-                                    break;
-                                default:
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho4(null);
+                                    }
                             }
                         }
-                        new Dao().update(list.get(i), true);
+                        if (conf.getWeb_service()) {
+                            if (next) {
+                                if (x == 0) {
+                                    codigo_biometria = "";
+                                    codigo_biometria += "" + list.get(i).getId();
+                                } else {
+                                    codigo_biometria += "," + list.get(i).getId();
+                                }
+                                x++;
+                            }
+                        } else {
+                            new Dao().update(list.get(i), true);
+                        }
+                    }
+                    if (conf.getWeb_service()) {
+                        if (!codigo_biometria.isEmpty()) {
+                            codigo_biometria += "";
+                        }
+                        webService.param("codigo_biometria", codigo_biometria);
+                        webService.GET("biometria_atualizar.jsf", "update_aparelho");
                     }
                     Preloader p = new Preloader();
                     p.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
@@ -649,6 +686,8 @@ public class Menu extends JFrame implements ActionListener {
     }
 
     public List getListBiometria() {
+        WebService webService = new WebService();
+        WSStatus wSStatus = new WSStatus();
         if (reloadListBiometria) {
             if (!startedDate.equals(DataHoje.data())) {
                 reloadListBiometria = false;
@@ -659,10 +698,28 @@ public class Menu extends JFrame implements ActionListener {
         }
         if (listBiometria.isEmpty()) {
             if (reloadListBiometria) {
-                listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
+                if (conf.getWeb_service()) {
+                    String result = webService.GET("biometria_lista.jsf", "", "device_number=" + conf.getDevice());
+                    wSStatus = webService.wSStatus();
+                    Gson gson = new Gson();
+                    List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                    }.getType());
+                    converter(list);
+                } else {
+                    listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
+                }
             } else if (nitgen != null) {
                 if (!nitgen.getExistsDB()) {
-                    listBiometria = new BiometriaDao().listBiometria();
+                    if (conf.getWeb_service()) {
+                        String result = webService.GET("biometria_lista.jsf", "", "");
+                        wSStatus = webService.wSStatus();
+                        Gson gson = new Gson();
+                        List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                        }.getType());
+                        converter(list);
+                    } else {
+                        listBiometria = new BiometriaDao().listBiometria();
+                    }
                 }
             }
         }
@@ -688,6 +745,25 @@ public class Menu extends JFrame implements ActionListener {
 
     public void setTipo(Integer tipo) {
         this.tipo = tipo;
+    }
+
+    public void converter(List l) {
+        List<WSBiometria> list = l;
+        listBiometria = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            Biometria b = new Biometria();
+            Pessoa pessoa = new Pessoa();
+            pessoa.setId(list.get(i).getCodigo());
+            b.setId(list.get(i).getCodigo_biometria());
+            b.setPessoa(pessoa);
+            b.setBiometria(list.get(i).getBiometria());
+            b.setAtivo(list.get(i).getAtivo());
+            b.setDataAtualizacaoAparelho1(list.get(i).getDataAtualizacaoAparelho1());
+            b.setDataAtualizacaoAparelho2((list.get(i).getDataAtualizacaoAparelho2()));
+            b.setDataAtualizacaoAparelho3((list.get(i).getDataAtualizacaoAparelho3()));
+            b.setDataAtualizacaoAparelho4((list.get(i).getDataAtualizacaoAparelho4()));
+            listBiometria.add(b);
+        }
     }
 
 }

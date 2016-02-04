@@ -15,5 +15,6 @@
     "app": "teste",
     "key": "12345",
     "port": "8080",
-    "web_service": false
+    "web_service": false,
+	"session": true
 }
