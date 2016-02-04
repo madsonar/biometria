@@ -86,17 +86,20 @@ public final class Index extends JFrame implements ActionListener {
         Device device = new Device();
         device.loadJson();
         WebService webService = new WebService();
-        webService.GET("autenticar_dispositivo.jsf", "", "");
-        WSStatus wSStatus = webService.wSStatus();
-        if (wSStatus.getCodigo() != 0) {
-            JOptionPane.showMessageDialog(null,
-                    wSStatus.getDescricao(),
-                    "Validação",
-                    JOptionPane.WARNING_MESSAGE);
-            Logs logs = new Logs();
-            logs.save("index", wSStatus.getDescricao());
-            System.exit(0);
-            return;
+        WSStatus wSStatus = new WSStatus();
+        if (conf.getWeb_service()) {
+            webService.GET("autenticar_dispositivo.jsf", "", "");
+            wSStatus = webService.wSStatus();
+            if (wSStatus.getCodigo() != 0) {
+                JOptionPane.showMessageDialog(null,
+                        wSStatus.getDescricao(),
+                        "Validação",
+                        JOptionPane.WARNING_MESSAGE);
+                Logs logs = new Logs();
+                logs.save("index", wSStatus.getDescricao());
+                System.exit(0);
+                return;
+            }
         }
         if (conf.getType().equals(2)) {
             String mac = Mac.getInstance();
@@ -144,6 +147,9 @@ public final class Index extends JFrame implements ActionListener {
                     dao.save(biometriaServidor, true);
                 }
             }
+        } else if (conf.getWeb_service()) {
+            webService.param("device_number", conf.getDevice());
+            webService.PUT("biometria_reload");
         } else {
             new BiometriaDao().reload(conf.getDevice());
         }

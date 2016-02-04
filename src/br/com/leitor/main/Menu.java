@@ -288,12 +288,20 @@ public class Menu extends JFrame implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            WebService webService = new WebService();
             if (actionInstance) {
                 return;
             }
             timer.setDelay(0);
-            BiometriaAtualizaCatraca bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
-            bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
+            BiometriaAtualizaCatraca bac = null;
+            if (conf.getWeb_service()) {
+                webService.param("device_number", conf.getDevice());
+                webService.PUT("biometria_atualiza_catraca");
+                bac = (BiometriaAtualizaCatraca) webService.object(new BiometriaAtualizaCatraca());
+            } else {
+                bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
+                bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
+            }
             if (bac != null) {
                 if (null != conf.getDevice()) {
                     switch (conf.getDevice()) {
@@ -321,9 +329,14 @@ public class Menu extends JFrame implements ActionListener {
                             break;
                     }
                 }
-                new Dao().update(bac, true);
+                if (conf.getWeb_service()) {
+                    webService.object("biometria_atualiza_catraca", bac);
+                    webService.action("update");
+                    webService.PUT("biometria_atualiza_catraca");
+                } else {
+                    new Dao().update(bac, true);
+                }
             }
-            WebService webService = new WebService();
             if (nitgen.getHardware()) {
                 if (reload) {
                     reload = false;
@@ -413,29 +426,51 @@ public class Menu extends JFrame implements ActionListener {
                         status = entry.getKey();
                         id = entry.getValue();
                     }
-                    BiometriaCatraca bc = new BiometriaCatraca();
-                    BiometriaCatracaDao bcd = new BiometriaCatracaDao();
-                    if (status == 1) {
-                        bcd.destroy(ip);
-                        System.err.println("Biometria não encontrada!");
-                        Logs logs = new Logs();
-                        logs.save("menu", "Biometria Catraca - Não encontrada!");
-                        bc.setIp(ip);
-                        bc.setPessoa(null);
-                        new Dao().save(bc, true);
-                        return;
-                    }
-                    bc.setIp(ip);
-                    if (id == null) {
-                        bc.setPessoa(null);
-                    } else {
-                        List list = bcd.findByPessoa(id);
-                        for (int i = 0; i < list.size(); i++) {
-                            new Dao().delete(list.get(i), true);
+                    if (conf.getWeb_service()) {
+                        webService.param("biometria_ip", ip);
+                        if(id != null) {
+                            webService.param("codigo_pessoa", id);                            
                         }
-                        bc.setPessoa((Pessoa) new Dao().find(new Pessoa(), id));
+                        webService.param("biometria_status", status);
+                        webService.action("update_catraca");
+                        webService.GET("biometria_atualiza_catraca");
+                        if (webService.wSStatus().getCodigo().equals(0)) {
+                            if (status == 1) {
+                                Logs logs = new Logs();
+                                logs.save("menu", "Biometria Catraca - Não encontrada!");
+                                return;
+                            }
+                        } else {
+                            Logs logs = new Logs();
+                            logs.save("erro", "Erro na hora de atualizar a catraca!");
+                            return;
+                        }
+
+                    } else {
+                        BiometriaCatraca bc = new BiometriaCatraca();
+                        BiometriaCatracaDao bcd = new BiometriaCatracaDao();
+                        if (status == 1) {
+                            bcd.destroy(ip);
+                            System.err.println("Biometria não encontrada!");
+                            Logs logs = new Logs();
+                            logs.save("menu", "Biometria Catraca - Não encontrada!");
+                            bc.setIp(ip);
+                            bc.setPessoa(null);
+                            new Dao().save(bc, true);
+                            return;
+                        }
+                        bc.setIp(ip);
+                        if (id == null) {
+                            bc.setPessoa(null);
+                        } else {
+                            List list = bcd.findByPessoa(id);
+                            for (int i = 0; i < list.size(); i++) {
+                                new Dao().delete(list.get(i), true);
+                            }
+                            bc.setPessoa((Pessoa) new Dao().find(new Pessoa(), id));
+                        }
+                        new Dao().save(bc, true);
                     }
-                    new Dao().save(bc, true);
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException ex) {
