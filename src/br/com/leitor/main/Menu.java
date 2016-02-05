@@ -288,6 +288,26 @@ public class Menu extends JFrame implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (!WebService.existConnection()) {
+                Preloader p = new Preloader();
+                p.setAppTitle("Servidor offline, aguarde");
+                p.setAppStatus("Servidor offline, aguarde");
+                p.setWaitingStarted(false);
+                p.setMinModal(true);
+                p.show();
+                for (int x = 0; x < 1; x++) {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if (WebService.existConnection()) {
+                        p.hide();
+                        break;
+                    }
+                    x--;
+                }                        
+            }            
             WebService webService = new WebService();
             if (actionInstance) {
                 return;
@@ -657,7 +677,22 @@ public class Menu extends JFrame implements ActionListener {
 
             try {
                 for (int i = 0; i < 1; i++) {
-                    if (pool.captura()) {
+                    if (!WebService.existConnection()) {
+                        Preloader p = new Preloader();
+                        p.setAppTitle("Servidor offline, aguarde");
+                        p.setAppStatus("Servidor offline, aguarde");
+                        p.setWaitingStarted(false);
+                        p.show();
+                        for (int x = 0; x < 1; x++) {
+                            Thread.sleep(10000);
+                            if (WebService.existConnection()) {
+                                p.hide();
+                                break;
+                            }
+                            x--;
+                        }                        
+                    }
+                    if (pool.captura()) {                       
                         if (stop < 1) {
                             stop++;
                             start();
@@ -677,6 +712,11 @@ public class Menu extends JFrame implements ActionListener {
     };
 
     public void start() {
+        Preloader p = new Preloader();
+        p.setAppTitle("Solicitação");
+        p.setAppStatus("Pedido de cadastramento recebido, aguarde");
+        p.setWaitingStarted(false);
+        p.show();
         Integer codigo_pessoa = null;
         BiometriaCaptura bc = new BiometriaCaptura();
         if (conf.getWeb_service()) {
@@ -712,6 +752,7 @@ public class Menu extends JFrame implements ActionListener {
             } else if (nitgen.getDevice_start() == 0) {
                 non_device();
             }
+            p.hide();
             Integer status = null;
             if (conf.getWeb_service()) {
                 if (codigo_pessoa != null) {
@@ -755,6 +796,7 @@ public class Menu extends JFrame implements ActionListener {
             biometria = null;
             nitgen.dispose();
         } catch (Exception e) {
+            p.hide();
             Close.clear();
         }
     }

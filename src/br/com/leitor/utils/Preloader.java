@@ -77,7 +77,7 @@ public class Preloader {
             frame.setVisible(true);
             if (waitingStarted) {
                 try {
-                    Thread.sleep(0);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
 
                 }
@@ -123,7 +123,7 @@ public class Preloader {
             frame.setVisible(true);
             if (waitingStarted) {
                 try {
-                    Thread.sleep(4);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
 
                 }

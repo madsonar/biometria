@@ -18,12 +18,18 @@ public class Close {
         conf.loadJson();
         WebService webService = new WebService();
         if (conf.getWeb_service()) {
-            webService.PUT("biometria_habilitar.jsf", "", "habilitar=false");
+            webService.param("habilitar", false);
+            webService.PUT("biometria_habilitar.jsf");
+            try {
+                webService.execute();                
+            } catch(Exception e) {
+                
+            }
             try {
                 webService.execute();
                 WSStatus wSStatus = webService.wSStatus();
                 if (wSStatus.getCodigo() == 0) {
-                    webService.PUT("biometria_limpar.jsf", "", "");
+                    webService.PUT("biometria_limpar.jsf");
                     try {
                         webService.execute();
                     } catch (Exception ex) {

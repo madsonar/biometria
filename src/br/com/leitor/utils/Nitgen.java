@@ -429,6 +429,9 @@ public class Nitgen {
                     }
                     this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
                     this.digitalCapturadaString = textSavedFIR.TextFIR;
+                    if(this.digitalCapturadaString == null) {
+                        return 2;
+                    }
                     nBioBSP.CloseDevice(device.DeviceInfo[0].NameID, device.DeviceInfo[0].Instance);
 
                     if (this.digitalCapturadaString == null) {
@@ -771,8 +774,9 @@ public class Nitgen {
                         webService.GET("biometria_captura");
                         webService.execute();
                     } catch (Exception ex) {
+                        return false;
                     }
-
+                    return true;
                 } else {
                     BiometriaErroDao biometriaErroDao = new BiometriaErroDao();
                     BiometriaErro biometriaErro;
@@ -797,6 +801,7 @@ public class Nitgen {
                         biometriaErro.setNrDispositivo(conf.getDevice());
                         biometriaErro.setMacFilial(MacFilial.getAcessoFilial());
                     }
+                    return true;
                 }
 
             }
