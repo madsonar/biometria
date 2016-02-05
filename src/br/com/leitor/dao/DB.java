@@ -18,57 +18,59 @@ public class DB {
     private EntityManager entidade;
 
     public EntityManager getEntityManager() {
-        if (entidade == null) {
-            Conf conf = new Conf();
-            conf.loadJson();
-            String databaseName = "";
-            if (!conf.getClient().isEmpty()) {
-                databaseName = conf.getClient();
-                Configuracao configuracao = servidor(databaseName);
-                DataBase dataBase = new DataBase();
-                dataBase.loadJson();
-                Integer port = 5432;
-                if (dataBase.getHost() != null && !dataBase.getHost().isEmpty()) {
-                    configuracao.setHost(dataBase.getHost());
-                }
-                if (dataBase.getPort() != null && dataBase.getPort() != 0) {
-                    port = dataBase.getPort();
-                }
-                if (!dataBase.getDatabase().isEmpty()) {
-                    configuracao.setPersistence(dataBase.getDatabase());
-                }
-                if (!dataBase.getPassword().isEmpty()) {
-                    configuracao.setSenha(dataBase.getPassword());
-                }
-                try {
-                    String dados_conexao = "Biometria - " + conf.getClient() + " - " + conf.getFilial() + " - " + conf.getDevice() + " - " + conf.getModel() + " - " + conf.getBrand();
-                    Map properties = new HashMap();
-                    properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.NONE);
-                    // properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.SoftWeak);
-                    //properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.Full);
-                    properties.put(TopLinkProperties.JDBC_USER, "postgres");
-                    properties.put(TopLinkProperties.TRANSACTION_TYPE, "RESOURCE_LOCAL");
-                    properties.put(TopLinkProperties.JDBC_DRIVER, "org.postgresql.Driver");
-                    properties.put(TopLinkProperties.JDBC_PASSWORD, configuracao.getSenha());
-                    properties.put(TopLinkProperties.JDBC_URL, "jdbc:postgresql://" + configuracao.getHost() + ":" + port + "/" + configuracao.getPersistence() + "?ApplicationName=" + dados_conexao);
-                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(configuracao.getPersistence(), properties);
-                    String createTable = "";
-                    if (createTable.equals("criar")) {
-                        properties.put(EntityManagerFactoryProvider.DDL_GENERATION, EntityManagerFactoryProvider.CREATE_ONLY);
+        Conf conf = new Conf();
+        if (!conf.getWeb_service()) {
+            if (entidade == null) {
+                conf.loadJson();
+                String databaseName = "";
+                if (!conf.getClient().isEmpty()) {
+                    databaseName = conf.getClient();
+                    Configuracao configuracao = servidor(databaseName);
+                    DataBase dataBase = new DataBase();
+                    dataBase.loadJson();
+                    Integer port = 5432;
+                    if (dataBase.getHost() != null && !dataBase.getHost().isEmpty()) {
+                        configuracao.setHost(dataBase.getHost());
                     }
-                    entidade = emf.createEntityManager();
-                } catch (Exception e) {
-                    if (entidade == null) {
-                        Logs logs = new Logs();
-                        logs.save("DB", "Erro ao conectar a base de dados, verifique o arquivo de configuração (database.json)!");
-                        System.exit(0);
+                    if (dataBase.getPort() != null && dataBase.getPort() != 0) {
+                        port = dataBase.getPort();
                     }
-                    return null;
+                    if (!dataBase.getDatabase().isEmpty()) {
+                        configuracao.setPersistence(dataBase.getDatabase());
+                    }
+                    if (!dataBase.getPassword().isEmpty()) {
+                        configuracao.setSenha(dataBase.getPassword());
+                    }
+                    try {
+                        String dados_conexao = "Biometria - " + conf.getClient() + " - " + conf.getFilial() + " - " + conf.getDevice() + " - " + conf.getModel() + " - " + conf.getBrand();
+                        Map properties = new HashMap();
+                        properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.NONE);
+                        // properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.SoftWeak);
+                        //properties.put(TopLinkProperties.CACHE_TYPE_DEFAULT, CacheType.Full);
+                        properties.put(TopLinkProperties.JDBC_USER, "postgres");
+                        properties.put(TopLinkProperties.TRANSACTION_TYPE, "RESOURCE_LOCAL");
+                        properties.put(TopLinkProperties.JDBC_DRIVER, "org.postgresql.Driver");
+                        properties.put(TopLinkProperties.JDBC_PASSWORD, configuracao.getSenha());
+                        properties.put(TopLinkProperties.JDBC_URL, "jdbc:postgresql://" + configuracao.getHost() + ":" + port + "/" + configuracao.getPersistence() + "?ApplicationName=" + dados_conexao);
+                        EntityManagerFactory emf = Persistence.createEntityManagerFactory(configuracao.getPersistence(), properties);
+                        String createTable = "";
+                        if (createTable.equals("criar")) {
+                            properties.put(EntityManagerFactoryProvider.DDL_GENERATION, EntityManagerFactoryProvider.CREATE_ONLY);
+                        }
+                        entidade = emf.createEntityManager();
+                    } catch (Exception e) {
+                        if (entidade == null) {
+                            Logs logs = new Logs();
+                            logs.save("DB", "Erro ao conectar a base de dados, verifique o arquivo de configuração (database.json)!");
+                            System.exit(0);
+                        }
+                        return null;
+                    }
+                } else {
+                    Logs logs = new Logs();
+                    logs.save("DB", "Cliente não encontrado!");
+                    System.exit(0);
                 }
-            } else {
-                Logs logs = new Logs();
-                logs.save("DB", "Cliente não encontrado!");
-                System.exit(0);
             }
         }
         return entidade;

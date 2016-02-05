@@ -17,6 +17,7 @@ import br.com.leitor.utils.Nitgen;
 import br.com.leitor.utils.Path;
 import br.com.leitor.utils.Preloader;
 import br.com.leitor.webservice.classes.WSBiometria;
+import br.com.leitor.webservice.classes.WSBiometriaCaptura;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.awt.AWTException;
@@ -51,7 +52,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import rtools.WSStatus;
 import rtools.WebService;
 
 public class Menu extends JFrame implements ActionListener {
@@ -295,9 +295,14 @@ public class Menu extends JFrame implements ActionListener {
             timer.setDelay(0);
             BiometriaAtualizaCatraca bac = null;
             if (conf.getWeb_service()) {
-                webService.param("device_number", conf.getDevice());
-                webService.PUT("biometria_atualiza_catraca");
-                bac = (BiometriaAtualizaCatraca) webService.object(new BiometriaAtualizaCatraca());
+                try {
+                    webService.param("device_number", conf.getDevice());
+                    webService.PUT("biometria_atualiza_catraca");
+                    webService.execute();
+                    bac = (BiometriaAtualizaCatraca) webService.object(new BiometriaAtualizaCatraca());
+                } catch (Exception ex) {
+
+                }
             } else {
                 bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
                 bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
@@ -330,9 +335,14 @@ public class Menu extends JFrame implements ActionListener {
                     }
                 }
                 if (conf.getWeb_service()) {
-                    webService.object("biometria_atualiza_catraca", bac);
-                    webService.action("update");
-                    webService.PUT("biometria_atualiza_catraca");
+                    try {
+                        webService.paramObject("biometria_atualiza_catraca", bac);
+                        webService.action("update");
+                        webService.PUT("biometria_atualiza_catraca");
+                        webService.execute();
+                    } catch (Exception ex) {
+
+                    }
                 } else {
                     new Dao().update(bac, true);
                 }
@@ -393,6 +403,11 @@ public class Menu extends JFrame implements ActionListener {
                         }
                         webService.param("codigo_biometria", codigo_biometria);
                         webService.GET("biometria_atualizar.jsf", "update_aparelho");
+                        try {
+                            webService.execute();
+                        } catch (Exception ex) {
+
+                        }
                     }
                     Preloader p = new Preloader();
                     p.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
@@ -428,22 +443,27 @@ public class Menu extends JFrame implements ActionListener {
                     }
                     if (conf.getWeb_service()) {
                         webService.param("biometria_ip", ip);
-                        if(id != null) {
-                            webService.param("codigo_pessoa", id);                            
+                        if (id != null) {
+                            webService.param("codigo_pessoa", id);
                         }
                         webService.param("biometria_status", status);
                         webService.action("update_catraca");
                         webService.GET("biometria_atualiza_catraca");
-                        if (webService.wSStatus().getCodigo().equals(0)) {
-                            if (status == 1) {
+                        try {
+                            webService.execute();
+                            if (webService.wSStatus().getCodigo().equals(0)) {
+                                if (status == 1) {
+                                    Logs logs = new Logs();
+                                    logs.save("menu", "Biometria Catraca - Não encontrada!");
+                                    return;
+                                }
+                            } else {
                                 Logs logs = new Logs();
-                                logs.save("menu", "Biometria Catraca - Não encontrada!");
+                                logs.save("erro", "Erro na hora de atualizar a catraca!");
                                 return;
                             }
-                        } else {
-                            Logs logs = new Logs();
-                            logs.save("erro", "Erro na hora de atualizar a catraca!");
-                            return;
+                        } catch (Exception ex) {
+
                         }
 
                     } else {
@@ -637,7 +657,7 @@ public class Menu extends JFrame implements ActionListener {
 
             try {
                 for (int i = 0; i < 1; i++) {
-                    if (pool.getBiometriaCaptura() != null) {
+                    if (pool.captura()) {
                         if (stop < 1) {
                             stop++;
                             start();
@@ -657,12 +677,28 @@ public class Menu extends JFrame implements ActionListener {
     };
 
     public void start() {
-        BiometriaDao biometriaDao = new BiometriaDao();
-        List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
+        Integer codigo_pessoa = null;
         BiometriaCaptura bc = new BiometriaCaptura();
-        if (!list.isEmpty()) {
-            bc = (BiometriaCaptura) list.get(0);
-            biometria = biometriaDao.pesquisaBiometriaPorPessoa(bc.getPessoa().getId());
+        if (conf.getWeb_service()) {
+            try {
+                WebService webService = new WebService();
+                webService.action("pedido_captura");
+                webService.GET("biometria_captura");
+                webService.execute();
+                WSBiometriaCaptura wsbc = (WSBiometriaCaptura) webService.object(new WSBiometriaCaptura());
+                if (wsbc != null) {
+                    codigo_pessoa = wsbc.getCodigo_pessoa();
+                }
+            } catch (Exception ex) {
+            }
+        } else {
+            BiometriaDao biometriaDao = new BiometriaDao();
+            List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
+            codigo_pessoa = bc.getPessoa().getId();
+            if (!list.isEmpty()) {
+                bc = (BiometriaCaptura) list.get(0);
+                biometria = biometriaDao.pesquisaBiometriaPorPessoa(bc.getPessoa().getId());
+            }
         }
         super.setAlwaysOnTop(true);
         super.toFront();
@@ -676,31 +712,42 @@ public class Menu extends JFrame implements ActionListener {
             } else if (nitgen.getDevice_start() == 0) {
                 non_device();
             }
-            nitgen.setPessoa(bc.getPessoa());
-            Integer status = nitgen.readSave();
-            if (status != null) {
-                switch (status) {
-                    case 1:
-                        biometria = nitgen.getBiometria();
-                        JOptionPane.showMessageDialog(null, "Biometria cadastrada com sucesso");
-                        break;
-                    case 0:
-                        JOptionPane.showMessageDialog(null, "Erro ao cadastrar biometria");
-                        break;
-                    case 2:
-                        JOptionPane.showMessageDialog(null, "Digital não encontrada! Tente novamente!");
-                        break;
-                    case 3:
-                        JOptionPane.showMessageDialog(null, "Dispositivo desconectado!");
-                        break;
-                    case 4:
-                        JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário!");
-                        break;
-                    default:
-                        break;
+            Integer status = null;
+            if (conf.getWeb_service()) {
+                if (codigo_pessoa != null) {
+                    nitgen.setCodigo_pessoa(codigo_pessoa);
+                    status = nitgen.readSaveWS();
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Erro de status null!");
+                nitgen.setPessoa(bc.getPessoa());
+                status = nitgen.readSave();
+            }
+            if (codigo_pessoa != null) {
+                if (status != null) {
+                    switch (status) {
+                        case 1:
+                            JOptionPane.showMessageDialog(null, "Biometria cadastrada com sucesso");
+                            break;
+                        case 0:
+                            JOptionPane.showMessageDialog(null, "Erro ao cadastrar biometria");
+                            break;
+                        case 2:
+                            JOptionPane.showMessageDialog(null, "Digital não encontrada! Tente novamente!");
+                            break;
+                        case 3:
+                            JOptionPane.showMessageDialog(null, "Dispositivo desconectado!");
+                            break;
+                        case 4:
+                            JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário!");
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Erro de status null!");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Nenhuma pessoa encontrada!");
             }
             stop = 0;
             i = 0;
@@ -722,36 +769,52 @@ public class Menu extends JFrame implements ActionListener {
 
     public List getListBiometria() {
         WebService webService = new WebService();
-        WSStatus wSStatus = new WSStatus();
         if (reloadListBiometria) {
             if (!startedDate.equals(DataHoje.data())) {
-                reloadListBiometria = false;
-                listBiometria.clear();
-                startedDate = DataHoje.data();
-                new BiometriaDao().reload();
+                if (conf.getWeb_service()) {
+                    webService.param("device_number", conf.getDevice());
+                    webService.PUT("biometria_reload");
+                    try {
+                        webService.execute();
+                    } catch (Exception ex) {
+                    }
+                } else {
+                    reloadListBiometria = false;
+                    listBiometria.clear();
+                    startedDate = DataHoje.data();
+                    new BiometriaDao().reload();
+                }
             }
         }
         if (listBiometria.isEmpty()) {
             if (reloadListBiometria) {
                 if (conf.getWeb_service()) {
-                    String result = webService.GET("biometria_lista.jsf", "", "device_number=" + conf.getDevice());
-                    wSStatus = webService.wSStatus();
-                    Gson gson = new Gson();
-                    List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
-                    }.getType());
-                    converter(list);
+                    try {
+                        webService.GET("biometria_lista.jsf", "", "device_number=" + conf.getDevice());
+                        String result = webService.execute();
+                        Gson gson = new Gson();
+                        List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                        }.getType());
+                        converter(list);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else {
                     listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
                 }
             } else if (nitgen != null) {
                 if (!nitgen.getExistsDB()) {
                     if (conf.getWeb_service()) {
-                        String result = webService.GET("biometria_lista.jsf", "", "");
-                        wSStatus = webService.wSStatus();
-                        Gson gson = new Gson();
-                        List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
-                        }.getType());
-                        converter(list);
+                        try {
+                            webService.GET("biometria_lista.jsf", "", "");
+                            String result = webService.execute();
+                            Gson gson = new Gson();
+                            List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                            }.getType());
+                            converter(list);
+                        } catch (Exception ex) {
+                            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     } else {
                         listBiometria = new BiometriaDao().listBiometria();
                     }

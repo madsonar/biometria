@@ -19,10 +19,17 @@ public class Close {
         WebService webService = new WebService();
         if (conf.getWeb_service()) {
             webService.PUT("biometria_habilitar.jsf", "", "habilitar=false");
-            WSStatus wSStatus = webService.wSStatus();
-            if (wSStatus.getCodigo() == 0) {
-                webService.PUT("biometria_limpar.jsf", "", "");
-                wSStatus = webService.wSStatus();
+            try {
+                webService.execute();
+                WSStatus wSStatus = webService.wSStatus();
+                if (wSStatus.getCodigo() == 0) {
+                    webService.PUT("biometria_limpar.jsf", "", "");
+                    try {
+                        webService.execute();
+                    } catch (Exception ex) {
+                    }
+                }
+            } catch (Exception ex) {
             }
         } else {
             BiometriaDao biometriaDao = new BiometriaDao();
@@ -53,7 +60,7 @@ public class Close {
         try {
             if (conf.getWeb_service()) {
                 webService.PUT("biometria_limpar.jsf", "", "");
-                WSStatus wSStatus = webService.wSStatus();
+                webService.execute();
             } else {
                 BiometriaDao biometriaDao = new BiometriaDao();
                 Dao dao = new Dao();

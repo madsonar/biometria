@@ -23,6 +23,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -89,14 +91,26 @@ public final class Index extends JFrame implements ActionListener {
         WSStatus wSStatus = new WSStatus();
         if (conf.getWeb_service()) {
             webService.GET("autenticar_dispositivo.jsf", "", "");
-            wSStatus = webService.wSStatus();
-            if (wSStatus.getCodigo() != 0) {
+            try {
+                webService.execute();
+                wSStatus = webService.wSStatus();
+                if (wSStatus == null || (wSStatus.getCodigo() != null && wSStatus.getCodigo() != 0)) {
+                    JOptionPane.showMessageDialog(null,
+                            wSStatus.getDescricao(),
+                            "Validação",
+                            JOptionPane.WARNING_MESSAGE);
+                    Logs logs = new Logs();
+                    logs.save("index", wSStatus.getDescricao());
+                    System.exit(0);
+                    return;
+                }
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null,
                         wSStatus.getDescricao(),
                         "Validação",
                         JOptionPane.WARNING_MESSAGE);
                 Logs logs = new Logs();
-                logs.save("index", wSStatus.getDescricao());
+                logs.save("index", ex.getMessage());
                 System.exit(0);
                 return;
             }
@@ -105,14 +119,26 @@ public final class Index extends JFrame implements ActionListener {
             String mac = Mac.getInstance();
             if (conf.getWeb_service()) {
                 webService.PUT("biometria_habilitar.jsf", "", "habilitar=true");
-                wSStatus = webService.wSStatus();
-                if (wSStatus == null || wSStatus.getCodigo() != 0) {
+                try {
+                    webService.execute();
+                    wSStatus = webService.wSStatus();
+                    if (wSStatus == null || (wSStatus.getCodigo() != null && wSStatus.getCodigo() != 0)) {
+                        JOptionPane.showMessageDialog(null,
+                                wSStatus.getDescricao(),
+                                "Validação",
+                                JOptionPane.WARNING_MESSAGE);
+                        Logs logs = new Logs();
+                        logs.save("index", wSStatus.getDescricao());
+                        System.exit(0);
+                        return;
+                    }
+                } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null,
                             wSStatus.getDescricao(),
                             "Validação",
                             JOptionPane.WARNING_MESSAGE);
                     Logs logs = new Logs();
-                    logs.save("index", wSStatus.getDescricao());
+                    logs.save("index", ex.getMessage());
                     System.exit(0);
                     return;
                 }
@@ -150,6 +176,10 @@ public final class Index extends JFrame implements ActionListener {
         } else if (conf.getWeb_service()) {
             webService.param("device_number", conf.getDevice());
             webService.PUT("biometria_reload");
+            try {
+                webService.execute();
+            } catch (Exception ex) {
+            }
         } else {
             new BiometriaDao().reload(conf.getDevice());
         }

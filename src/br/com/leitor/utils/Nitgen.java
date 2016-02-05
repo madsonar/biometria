@@ -10,6 +10,7 @@ import br.com.leitor.pessoa.dao.BiometriaErroDao;
 import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
 import br.com.leitor.sistema.conf.Device;
+import br.com.leitor.webservice.classes.WSBiometriaCaptura;
 import com.nitgen.SDK.BSP.NBioBSPJNI;
 import com.nitgen.SDK.BSP.NBioBSPJNI.DEVICE_ENUM_INFO;
 import java.io.File;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import rtools.WebService;
 
 public class Nitgen {
 
@@ -29,6 +31,7 @@ public class Nitgen {
     private Integer digitalCapturada;
     private String digitalCapturadaString;
     private Pessoa pessoa;
+    private Integer codigo_pessoa;
     private Biometria biometria;
     private Boolean showBiometria;
     private Boolean hardware;
@@ -151,7 +154,7 @@ public class Nitgen {
                         try {
                             for (int i = 0; i < confDevice.getDisabled_finger().size(); i++) {
                                 Integer finger_number = Integer.parseInt(confDevice.getDisabled_finger().get(i).toString());
-                                    switch (finger_number) {
+                                switch (finger_number) {
                                     case 1:
                                         option.DisableFingerForEnroll0 = 1;
                                         break;
@@ -184,9 +187,9 @@ public class Nitgen {
                                         break;
                                 }
                             }
-                            
+
                         } catch (Exception e) {
-                            
+
                         }
                     }
                     nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.ENROLL, hFIR, -1, null, option);
@@ -312,6 +315,234 @@ public class Nitgen {
                     } else if (!dao.update(biometria, true)) {
                         return 0;
                     }
+                    break;
+            }
+
+        } else {
+            return 3;
+        }
+
+        return 1;
+    }
+
+    public Integer readSaveWS() {
+        int userID = 0;
+        WebService webService = new WebService();
+        WSBiometriaCaptura wsbc = new WSBiometriaCaptura();
+        if (hardware) {
+            try {
+                webService.param("codigo_pessoa", codigo_pessoa);
+                webService.action("salvar");
+                webService.GET("biometria_captura");
+                webService.execute();
+                wsbc = (WSBiometriaCaptura) webService.object(new WSBiometriaCaptura());
+                if (wsbc != null) {
+                    codigo_pessoa = wsbc.getCodigo_pessoa();
+                }
+            } catch (Exception ex) {
+            }
+            switch (conf.getBrand().toLowerCase()) {
+                case "nitgen":
+                    for (int i = 0; i < device.DeviceCount; i++) {
+                        try {
+                            int auto = device_info_ex.AutoOn;
+                            if (auto == 1) {
+                            }
+                            nBioBSP.OpenDevice(device_info_ex.NameID, device_info_ex.Instance);
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    NBioBSPJNI.FIR_HANDLE hFIR = nBioBSP.new FIR_HANDLE();
+                    NBioBSPJNI.WINDOW_OPTION option = nBioBSP.new WINDOW_OPTION();
+                    // TELA DE BOAS VINDAS HABILITADA
+                    if (!confDevice.getWelcome()) {
+                        option.WindowStyle = NBioBSPJNI.WINDOW_STYLE.NO_WELCOME;
+                    }
+                    if (!confDevice.getDisabled_finger().isEmpty()) {
+                        try {
+                            for (int i = 0; i < confDevice.getDisabled_finger().size(); i++) {
+                                Integer finger_number = Integer.parseInt(confDevice.getDisabled_finger().get(i).toString());
+                                switch (finger_number) {
+                                    case 1:
+                                        option.DisableFingerForEnroll0 = 1;
+                                        break;
+                                    case 2:
+                                        option.DisableFingerForEnroll1 = 1;
+                                        break;
+                                    case 3:
+                                        option.DisableFingerForEnroll2 = 1;
+                                        break;
+                                    case 4:
+                                        option.DisableFingerForEnroll3 = 1;
+                                        break;
+                                    case 5:
+                                        option.DisableFingerForEnroll4 = 1;
+                                        break;
+                                    case 6:
+                                        option.DisableFingerForEnroll5 = 1;
+                                        break;
+                                    case 7:
+                                        option.DisableFingerForEnroll6 = 1;
+                                        break;
+                                    case 8:
+                                        option.DisableFingerForEnroll7 = 1;
+                                        break;
+                                    case 9:
+                                        option.DisableFingerForEnroll8 = 1;
+                                        break;
+                                    default:
+                                        option.DisableFingerForEnroll9 = 1;
+                                        break;
+                                }
+                            }
+
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    nBioBSP.Capture(NBioBSPJNI.FIR_PURPOSE.ENROLL, hFIR, -1, null, option);
+                    // MÉDOTO ANTIGO
+                    // nBioBSP.Enroll(hFIR, null);
+                    if (checkError()) {
+                        if (nBioBSP.GetErrorCode() == NBioBSPJNI.ERROR.NBioAPIERROR_FUNCTION_FAIL) {
+                            nBioBSP.Capture(hFIR);
+                        }
+                    }
+                    NBioBSPJNI.INPUT_FIR inputFIR = nBioBSP.new INPUT_FIR();
+                    NBioBSPJNI.IndexSearch.SAMPLE_INFO sampleInfo = indexSearch.new SAMPLE_INFO();
+                    inputFIR.SetFIRHandle(hFIR);
+                    NBioBSPJNI.FIR_TEXTENCODE textSavedFIR = nBioBSP.new FIR_TEXTENCODE();
+                    //Pega a string de caracteres a partir do handle capturado
+                    //Declara o input_fir para fazer a comparação da digital
+                    inputFIR.SetTextFIR(textSavedFIR);
+                    NBioBSPJNI.IndexSearch.FP_INFO fpInfo = indexSearch.new FP_INFO();
+                    /* Faz o processo de identificação:
+                    * - Primeiro parametro: digital capturada no momento
+                    * - Segundo parametro: nivel de segurança. varia de 1 a 9. 5 é default.
+                    * - Terceiro parametro: informação do usuário
+                    * */
+                    indexSearch.Identify(inputFIR, 5, fpInfo);
+                    indexSearch.AddFIR(inputFIR, userID, sampleInfo);
+                    if (checkError()) {
+                        return 0;
+                    }
+                    this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
+                    this.digitalCapturadaString = textSavedFIR.TextFIR;
+                    nBioBSP.CloseDevice(device.DeviceInfo[0].NameID, device.DeviceInfo[0].Instance);
+
+                    if (this.digitalCapturadaString == null) {
+                        try {
+                            webService.action("update_aparelhos");
+                            webService.param("codigo_biometria", wsbc.getCodigo_biometria());
+                            webService.GET("biometria_captura");
+                            webService.execute();
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    }
+                    try {
+                        webService.action("pesquisa_biometria");
+                        webService.param("codigo_pessoa", codigo_pessoa);
+                        webService.GET("biometria_captura");
+                        webService.execute();
+                        wsbc = (WSBiometriaCaptura) webService.object(wsbc);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    if (!wsbc.getAtiva()) {
+                        Object[] options = {"Sim", "Não"};
+                        int resposta = JOptionPane.showOptionDialog(null,
+                                "Tem certeza que reativar esta biometria?", "Mensagem do Programa",
+                                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                                options, options[0]);
+                        if (resposta != 0) {
+                            // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
+                            return 4;
+                        }
+                        webService.action("update_aparelhos");
+                        wsbc.setDigital1(digitalCapturadaString);
+                        wsbc.setAtiva(true);
+                        webService.paramObject(wsbc);
+                        webService.GET("biometria_captura");
+                        try {
+                            webService.execute();
+                        } catch (Exception ex) {
+                            return null;
+                        }
+                    } else {
+                        wsbc.setDigital1(digitalCapturadaString);
+                        webService.paramObject(wsbc);
+                        webService.action("biometria_update");
+                        webService.GET("biometria_captura");
+                        try {
+                            webService.execute();
+                            if (webService.wSStatus().getCodigo() != null && !webService.wSStatus().getCodigo().equals(0)) {
+                                return 0;
+                            }
+                        } catch (Exception ex) {
+                            return 0;
+                        }
+                    }
+                    Close.clear();
+                    hFIR.dispose();
+                    hFIR = null;
+                    break;
+                case "topdata":
+//                    StringBuilder digital1 = new StringBuilder();
+//                    StringBuilder digital2 = new StringBuilder();
+//                    Boolean digital_capturada_1 = false;
+//                    Boolean digital_capturada_2 = false;
+//                    while (digital_capturada_1 == false || digital_capturada_2 == false) {
+//                        try {
+//                            if (!digital_capturada_1) {
+//                                JOptionPane.showMessageDialog(null, "Coloque a PRIMEIRA Digital");
+//                                digital1 = getDigitalHamster();
+//                                digital_capturada_1 = true;
+//                            }
+//                            if (!digital_capturada_2) {
+//                                JOptionPane.showMessageDialog(null, "Coloque a SEGUNDA Digital");
+//                                digital2 = getDigitalHamster();
+//                                digital_capturada_2 = true;
+//                            }
+//                        } catch (Exception ex) {
+//                            JOptionPane.showMessageDialog(null, ex);
+//                        }
+//
+//                        if (!digital_capturada_1 || !digital_capturada_2) {
+//                            return 0;
+//                        }
+//                    }
+//                    if (digital1.toString().isEmpty() || digital2.toString().isEmpty()) {
+//                        biometria.setAtivo(false);
+//                        biometria.setEnviado(true);
+//                        dao.update(biometria, true);
+//                        return 2;
+//                    }
+//                    biometria.setBiometria(digital1.toString());
+//                    biometria.setBiometria2(digital2.toString());
+//                    biometria.setEnviado(false);
+//                    if (!biometria.getAtivo()) {
+//                        Object[] options = {"Sim", "Não"};
+//                        int resposta = JOptionPane.showOptionDialog(null,
+//                                "Tem certeza que reativar esta biometria?", "Mensagem do Programa",
+//                                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+//                                options, options[0]);
+//                        if (resposta == 0) {
+//                            List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
+//                            if (!list.isEmpty()) {
+//                                biometria.setAtivo(true);
+//                                if (!dao.update(biometria, true)) {
+//                                    return 0;
+//                                }
+//                            }
+//                            // OPERAÇÃO CANCELADA PELO USUÁRIO - SERVIDOR
+//                            return 4;
+//
+//                        }
+//                    } else if (!dao.update(biometria, true)) {
+//                        return 0;
+//                    }
                     break;
             }
 
@@ -526,28 +757,46 @@ public class Nitgen {
             Integer code = nBioBSP.GetErrorCode();
             // OPERAÇÃO CANCELADA - QUANDO COLHIA A BIOMETRIA
             if (code == 513) {
-                BiometriaErroDao biometriaErroDao = new BiometriaErroDao();
-                BiometriaErro biometriaErro;
-                BiometriaErro be;
-                if (conf.getType() == 1) {
-                    be = biometriaErroDao.findByDecice(code);
-                    if (be != null) {
-                        new Dao().delete(be, true);
+                if (conf.getWeb_service()) {
+                    WebService webService = new WebService();
+                    if (conf.getType() == 1) {
+                        webService.param("type", 1);
+                    } else if (conf.getType() == 2) {
+                        webService.param("type", 2);
                     }
-                    new Dao().delete(be, true);
-                    biometriaErro = new BiometriaErro();
-                    biometriaErro.setNrCodigoErro(code);
-                    biometriaErro.setNrDispositivo(conf.getDevice());
-                    biometriaErro.setMacFilial(null);
-                } else if (conf.getType() == 2) {
-                    be = biometriaErroDao.findByMac(MacFilial.getAcessoFilial().getId());
-                    if (be != null) {
-                        new Dao().delete(be, true);
+                    try {
+                        webService.param("device", conf.getDevice());
+                        webService.param("code", code);
+                        webService.action("check_error");
+                        webService.GET("biometria_captura");
+                        webService.execute();
+                    } catch (Exception ex) {
                     }
-                    biometriaErro = new BiometriaErro();
-                    biometriaErro.setNrCodigoErro(null);
-                    biometriaErro.setNrDispositivo(conf.getDevice());
-                    biometriaErro.setMacFilial(MacFilial.getAcessoFilial());
+
+                } else {
+                    BiometriaErroDao biometriaErroDao = new BiometriaErroDao();
+                    BiometriaErro biometriaErro;
+                    BiometriaErro be;
+                    if (conf.getType() == 1) {
+                        be = biometriaErroDao.findByDecice(code);
+                        if (be != null) {
+                            new Dao().delete(be, true);
+                        }
+                        new Dao().delete(be, true);
+                        biometriaErro = new BiometriaErro();
+                        biometriaErro.setNrCodigoErro(code);
+                        biometriaErro.setNrDispositivo(conf.getDevice());
+                        biometriaErro.setMacFilial(null);
+                    } else if (conf.getType() == 2) {
+                        be = biometriaErroDao.findByMac(MacFilial.getAcessoFilial().getId());
+                        if (be != null) {
+                            new Dao().delete(be, true);
+                        }
+                        biometriaErro = new BiometriaErro();
+                        biometriaErro.setNrCodigoErro(null);
+                        biometriaErro.setNrDispositivo(conf.getDevice());
+                        biometriaErro.setMacFilial(MacFilial.getAcessoFilial());
+                    }
                 }
 
             }
@@ -778,5 +1027,13 @@ public class Nitgen {
                 e.getMessage();
             }
         }
+    }
+
+    public Integer getCodigo_pessoa() {
+        return codigo_pessoa;
+    }
+
+    public void setCodigo_pessoa(Integer codigo_pessoa) {
+        this.codigo_pessoa = codigo_pessoa;
     }
 }
