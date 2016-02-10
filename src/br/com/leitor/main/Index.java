@@ -1,11 +1,13 @@
 package br.com.leitor.main;
 
+import br.com.leitor.utils.CopyFilesConf;
 import br.com.leitor.dao.Dao;
 import br.com.leitor.pessoa.BiometriaServidor;
 import br.com.leitor.pessoa.dao.BiometriaDao;
 import br.com.leitor.seguranca.Conf;
 import br.com.leitor.seguranca.MacFilial;
 import br.com.leitor.seguranca.dao.MacFilialDao;
+import br.com.leitor.sistema.conf.Device;
 import br.com.leitor.usuario.Usuario;
 import br.com.leitor.usuario.dao.UsuarioDao;
 import br.com.leitor.utils.Block;
@@ -13,8 +15,8 @@ import br.com.leitor.utils.BlockInterface;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Mac;
 import br.com.leitor.utils.Ping;
+import br.com.leitor.utils.Preloader;
 import br.com.leitor.utils.Session;
-import br.com.leitor.utils.WebService;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +31,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import rtools.WSStatus;
+import rtools.WebService;
 
 public final class Index extends JFrame implements ActionListener {
 
@@ -38,11 +42,14 @@ public final class Index extends JFrame implements ActionListener {
     private JLabel lblPassword;
     private JPasswordField txtPassword;
     private GridLayout grid;
+    private final Preloader preloader;
+    private final Conf conf;
 
     public static void main(String args[]) {
-        Conf conf = new Conf();
-        conf.loadJson();
-        Block.TYPE = "" + conf.getType();
+        new CopyFilesConf().load();
+        Conf confx = new Conf();
+        confx.loadJson();
+        Block.TYPE = "" + confx.getType();
         Ping.execute();
         if (!Block.registerInstance()) {
             // instance already running.
@@ -61,6 +68,15 @@ public final class Index extends JFrame implements ActionListener {
     }
 
     public Index() {
+        conf = new Conf();
+        conf.loadJson();
+        Block.TYPE = "" + conf.getType();
+        preloader = new Preloader();
+        preloader.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+        preloader.setAppStatus("Iniciando...");
+        preloader.setShowIcon(true);
+        preloader.setWaitingStarted(true);
+        preloader.show();
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -68,14 +84,70 @@ public final class Index extends JFrame implements ActionListener {
                 System.exit(0);
             }
         });
-        Conf conf = new Conf();
-        conf.loadJson();
-        BiometriaDao biometriaDao = new BiometriaDao();
+        preloader.reloadStatus("Verificando se computador é registrado...");
+        Device device = new Device();
+        device.loadJson();
+        WebService webService = new WebService();
+        WSStatus wSStatus = new WSStatus();
+        if (conf.getWeb_service()) {
+            webService.GET("autenticar_dispositivo.jsf", "", "");
+            try {
+                webService.execute();
+                wSStatus = webService.wSStatus();
+                if (wSStatus == null || (wSStatus.getCodigo() != null && wSStatus.getCodigo() != 0)) {
+                    JOptionPane.showMessageDialog(null,
+                            wSStatus.getDescricao(),
+                            "Validação",
+                            JOptionPane.WARNING_MESSAGE);
+                    Logs logs = new Logs();
+                    logs.save("index", wSStatus.getDescricao());
+                    System.exit(0);
+                    return;
+                }
+            } catch (Exception ex) {
+                String erroMessage;
+                if (ex.getMessage().equals("Connection refused: connect")) {
+                    erroMessage = "Conexão recusada, servidor esta Offline!";
+                } else {
+                    erroMessage = ex.getMessage();
+                }
+                JOptionPane.showMessageDialog(null,
+                        erroMessage,
+                        "Erro",
+                        JOptionPane.WARNING_MESSAGE);
+                Logs logs = new Logs();
+                logs.save("index", ex.getMessage());
+                System.exit(0);
+                return;
+            }
+        }
         if (conf.getType().equals(2)) {
             String mac = Mac.getInstance();
             if (conf.getWeb_service()) {
-                Object result = WebService.GET("web_service.jsf", "", "");
-                // http://localhost:8080/Sindical/web_service.jsf?client=Sindical&user=teste&password=123456&app=teste&key=123456&&method=GET&action=biometria
+                webService.PUT("biometria_habilitar.jsf", "", "habilitar=true");
+                try {
+                    webService.execute();
+                    wSStatus = webService.wSStatus();
+                    if (wSStatus == null || (wSStatus.getCodigo() != null && wSStatus.getCodigo() != 0)) {
+                        JOptionPane.showMessageDialog(null,
+                                wSStatus.getDescricao(),
+                                "Validação",
+                                JOptionPane.WARNING_MESSAGE);
+                        Logs logs = new Logs();
+                        logs.save("index", wSStatus.getDescricao());
+                        System.exit(0);
+                        return;
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null,
+                            wSStatus.getDescricao(),
+                            "Validação",
+                            JOptionPane.WARNING_MESSAGE);
+                    Logs logs = new Logs();
+                    logs.save("index", ex.getMessage());
+                    System.exit(0);
+                    return;
+                }
             } else {
                 MacFilialDao macFilialDao = new MacFilialDao();
                 MacFilial macFilial = macFilialDao.findMacFilial(mac);
@@ -89,6 +161,7 @@ public final class Index extends JFrame implements ActionListener {
                     System.exit(0);
                     return;
                 }
+                BiometriaDao biometriaDao = new BiometriaDao();
                 List<BiometriaServidor> list = biometriaDao.pesquisaStatusPorComputador(macFilial.getId());
                 Dao dao = new Dao();
                 if (!list.isEmpty()) {
@@ -106,13 +179,18 @@ public final class Index extends JFrame implements ActionListener {
                     dao.save(biometriaServidor, true);
                 }
             }
+        } else if (conf.getWeb_service()) {
+            webService.param("device_number", conf.getDevice());
+            webService.PUT("biometria_reload");
+            try {
+                webService.execute();
+            } catch (Exception ex) {
+            }
         } else {
             new BiometriaDao().reload(conf.getDevice());
         }
         Close.clear();
-        // PreloaderDialog pd = new PreloaderDialog();
-        // pd.show("Iniciando");
-        // pd.hide();
+        preloader.hide();
         new Menu().setVisible(false);
     }
 

@@ -2,11 +2,11 @@
     "client": "Sindical",
     "filial": "Desenvolvimento",
     "type": 2,
-    "device": 1,
+    "device": 3,
     "brand": "Nitgen",
     "model": "Hamster DX",
     "version": "",
-    "ip": "192.168.1.100",
+    "ip": "",
     "local_db": true,
     "placed": false,
     "ssl": false,
@@ -15,5 +15,6 @@
     "app": "teste",
     "key": "12345",
     "port": "8080",
-    "web_service": false
+    "web_service": true,
+	"session": true
 }

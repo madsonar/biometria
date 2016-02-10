@@ -38,7 +38,7 @@ public class DataBase {
         }
         Logs logs = new Logs();
         try {
-            File file = new File(path + "\\lib\\database.json");
+            File file = new File(path + "\\lib\\conf\\database.json");
             if (!file.exists()) {
                 return;
             }

@@ -15,6 +15,11 @@ import br.com.leitor.utils.DataHoje;
 import br.com.leitor.utils.Logs;
 import br.com.leitor.utils.Nitgen;
 import br.com.leitor.utils.Path;
+import br.com.leitor.utils.Preloader;
+import br.com.leitor.webservice.classes.WSBiometria;
+import br.com.leitor.webservice.classes.WSBiometriaCaptura;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
@@ -47,6 +52,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import rtools.WebService;
 
 public class Menu extends JFrame implements ActionListener {
 
@@ -72,6 +78,7 @@ public class Menu extends JFrame implements ActionListener {
     private Boolean reloadListBiometria = false;
     private String startedDate = DataHoje.data();
     private Boolean actionInstance;
+    public Preloader preloader;
 
     static {
         try {
@@ -104,13 +111,8 @@ public class Menu extends JFrame implements ActionListener {
             }
         });
         started = false;
+        preloader = new Preloader();
         initComponents();
-        //setLayout(null);
-        //setSize(320, 320);
-        //setLocationRelativeTo(null);
-        //setTitle("Leitor Biométrico - " + title);
-        // setIconImage(new ImageIcon(getClass().getResource("/images/finger.png")).getImage());
-        //add(barra);
     }
 
     public void close() {
@@ -133,20 +135,32 @@ public class Menu extends JFrame implements ActionListener {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
-        actionInstance = false;
         conf = new Conf();
         conf.loadJson();
+        preloader.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+        preloader.setAppStatus("Verificando dispostivo...");
+        preloader.setShowIcon(true);
+        preloader.setWaitingStarted(true);
+        preloader.show();
+        preloader.hide();
+        actionInstance = false;
         tipo = conf.getType();
         // tipo = "gravar";
         listBiometria = new ArrayList();
-        if (tipo == 1) {
-            listBiometria = getListBiometria();
-        }
         try {
             nitgen = new Nitgen();
         } catch (Exception ex) {
             Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
+        if (tipo == 1) {
+            if (!nitgen.getExistsDB()) {
+                preloader.reloadStatus("Carregando base de dados...");
+            } else {
+                preloader.reloadStatus("Atualizando base de dados...");
+            }
+            listBiometria = getListBiometria();
+        }
+        preloader.hide();
         if (!started) {
             Container tela = getContentPane();
             tela.setLayout(null);
@@ -159,7 +173,7 @@ public class Menu extends JFrame implements ActionListener {
             //cadastrar.setActionCommand("Cadastrar");
             sair = new JMenuItem("Sair");
             ocultar = new JMenuItem("");
-            ocultar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/arrow_right_down_16x16.png")).getImage()));
+            ocultar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/resources/images/arrow_right_down_16x16.png")).getImage()));
             ocultar.setToolTipText("Esconder na bandeja do sistema");
             atualizar = new JMenuItem("Atualizar");
             sair.addActionListener(this);
@@ -222,14 +236,14 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.add(restart);
             popupMenu.addSeparator();
             if (tipo == 1) {
-                popupMenu.add(reiniciarDB);                
+                popupMenu.add(reiniciarDB);
                 popupMenu.addSeparator();
             }
             popupMenu.add(folderLogs);
             popupMenu.addSeparator();
             popupMenu.add(exitItem);
             popupMenu.addSeparator();
-            TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
+            TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/resources/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
             trayIcon.addActionListener(actionListener);
             trayIcon.setPopupMenu(popupMenu);
 
@@ -274,12 +288,45 @@ public class Menu extends JFrame implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (!WebService.existConnection()) {
+                Preloader p = new Preloader();
+                p.setAppTitle("Servidor offline, aguarde");
+                p.setAppStatus("Servidor offline, aguarde");
+                p.setWaitingStarted(false);
+                p.setMinModal(true);
+                p.show();
+                for (int x = 0; x < 1; x++) {
+                    try {
+                        Thread.sleep(10000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if (WebService.existConnection()) {
+                        p.hide();
+                        break;
+                    }
+                    x--;
+                }                        
+            }            
+            WebService webService = new WebService();
             if (actionInstance) {
                 return;
             }
             timer.setDelay(0);
-            BiometriaAtualizaCatraca bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
-            bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
+            BiometriaAtualizaCatraca bac = null;
+            if (conf.getWeb_service()) {
+                try {
+                    webService.param("device_number", conf.getDevice());
+                    webService.PUT("biometria_atualiza_catraca");
+                    webService.execute();
+                    bac = (BiometriaAtualizaCatraca) webService.object(new BiometriaAtualizaCatraca());
+                } catch (Exception ex) {
+
+                }
+            } else {
+                bac = new BiometriaAtualizaCatracaDao().refresh(conf.getDevice());
+                bac = (BiometriaAtualizaCatraca) new Dao().rebind(bac);
+            }
             if (bac != null) {
                 if (null != conf.getDevice()) {
                     switch (conf.getDevice()) {
@@ -307,35 +354,96 @@ public class Menu extends JFrame implements ActionListener {
                             break;
                     }
                 }
-                new Dao().update(bac, true);
+                if (conf.getWeb_service()) {
+                    try {
+                        webService.paramObject("biometria_atualiza_catraca", bac);
+                        webService.action("update");
+                        webService.PUT("biometria_atualiza_catraca");
+                        webService.execute();
+                    } catch (Exception ex) {
+
+                    }
+                } else {
+                    new Dao().update(bac, true);
+                }
             }
             if (nitgen.getHardware()) {
                 if (reload) {
                     reload = false;
                     nitgen.setLoad(true);
                     List<Biometria> list = getListBiometria();
+                    if (conf.getWeb_service()) {
+                        webService.param("device_number", conf.getDevice());
+                    }
+                    String codigo_biometria = "";
+                    int x = 0;
                     for (int i = 0; i < list.size(); i++) {
+                        Boolean next = false;
                         if (null != conf.getDevice()) {
                             switch (conf.getDevice()) {
                                 case 1:
-                                    list.get(i).setDataAtualizacaoAparelho1(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho1(null);
+                                    }
                                 case 2:
-                                    list.get(i).setDataAtualizacaoAparelho2(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho2(null);
+                                    }
                                 case 3:
-                                    list.get(i).setDataAtualizacaoAparelho3(null);
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho3(null);
+                                    }
                                 case 4:
-                                    list.get(i).setDataAtualizacaoAparelho4(null);
-                                    break;
-                                default:
-                                    break;
+                                    if (!next) {
+                                        next = true;
+                                        list.get(i).setDataAtualizacaoAparelho4(null);
+                                    }
                             }
                         }
-                        new Dao().update(list.get(i), true);
+                        if (conf.getWeb_service()) {
+                            if (next) {
+                                if (x == 0) {
+                                    codigo_biometria = "";
+                                    codigo_biometria += "" + list.get(i).getId();
+                                } else {
+                                    codigo_biometria += "," + list.get(i).getId();
+                                }
+                                x++;
+                            }
+                        } else {
+                            new Dao().update(list.get(i), true);
+                        }
                     }
+                    if (conf.getWeb_service()) {
+                        if (!codigo_biometria.isEmpty()) {
+                            codigo_biometria += "";
+                        }
+                        webService.param("codigo_biometria", codigo_biometria);
+                        webService.GET("biometria_atualizar.jsf", "update_aparelho");
+                        try {
+                            webService.execute();
+                        } catch (Exception ex) {
+
+                        }
+                    }
+                    Preloader p = new Preloader();
+                    p.setAppTitle("Dispostivo - " + conf.getBrand() + " - " + conf.getModel());
+                    p.setWaitingStarted(false);
+                    if (reloadListBiometria) {
+                        p.setAppTitle("Recarregando base, isto pode levar alguns minutos...aguarde.");
+                        p.setAppStatus("Recarregando base, isto pode levar alguns minutos...aguarde.");
+                    } else {
+                        p.setAppTitle("Carregando base, isto pode levar alguns minutos...aguarde.");
+                        p.setAppStatus("Carregando base, isto pode levar alguns minutos...aguarde.");
+                    }
+                    p.show();
+                    // add(p.getFrame());
                     nitgen.loadBiometria(reloadListBiometria, list);
+                    // remove(p.getFrame());
+                    p.hide();
                     if (!reloadListBiometria) {
                         reloadListBiometria = true;
                     }
@@ -353,29 +461,56 @@ public class Menu extends JFrame implements ActionListener {
                         status = entry.getKey();
                         id = entry.getValue();
                     }
-                    BiometriaCatraca bc = new BiometriaCatraca();
-                    BiometriaCatracaDao bcd = new BiometriaCatracaDao();
-                    if (status == 1) {
-                        bcd.destroy(ip);
-                        System.err.println("Biometria não encontrada!");
-                        Logs logs = new Logs();
-                        logs.save("menu", "Biometria Catraca - Não encontrada!");
-                        bc.setIp(ip);
-                        bc.setPessoa(null);
-                        new Dao().save(bc, true);
-                        return;
-                    }
-                    bc.setIp(ip);
-                    if (id == null) {
-                        bc.setPessoa(null);
-                    } else {
-                        List list = bcd.findByPessoa(id);
-                        for (int i = 0; i < list.size(); i++) {
-                            new Dao().delete(list.get(i), true);
+                    if (conf.getWeb_service()) {
+                        webService.param("biometria_ip", ip);
+                        if (id != null) {
+                            webService.param("codigo_pessoa", id);
                         }
-                        bc.setPessoa((Pessoa) new Dao().find(new Pessoa(), id));
+                        webService.param("biometria_status", status);
+                        webService.action("update_catraca");
+                        webService.GET("biometria_atualiza_catraca");
+                        try {
+                            webService.execute();
+                            if (webService.wSStatus().getCodigo().equals(0)) {
+                                if (status == 1) {
+                                    Logs logs = new Logs();
+                                    logs.save("menu", "Biometria Catraca - Não encontrada!");
+                                    return;
+                                }
+                            } else {
+                                Logs logs = new Logs();
+                                logs.save("erro", "Erro na hora de atualizar a catraca!");
+                                return;
+                            }
+                        } catch (Exception ex) {
+
+                        }
+
+                    } else {
+                        BiometriaCatraca bc = new BiometriaCatraca();
+                        BiometriaCatracaDao bcd = new BiometriaCatracaDao();
+                        if (status == 1) {
+                            bcd.destroy(ip);
+                            System.err.println("Biometria não encontrada!");
+                            Logs logs = new Logs();
+                            logs.save("menu", "Biometria Catraca - Não encontrada!");
+                            bc.setIp(ip);
+                            bc.setPessoa(null);
+                            new Dao().save(bc, true);
+                            return;
+                        }
+                        bc.setIp(ip);
+                        if (id == null) {
+                            bc.setPessoa(null);
+                        } else {
+                            List list = bcd.findByPessoa(id);
+                            for (int i = 0; i < list.size(); i++) {
+                                new Dao().delete(list.get(i), true);
+                            }
+                            bc.setPessoa((Pessoa) new Dao().find(new Pessoa(), id));
+                        }
+                        new Dao().save(bc, true);
                     }
-                    new Dao().save(bc, true);
                     try {
                         Thread.sleep(3000);
                     } catch (InterruptedException ex) {
@@ -453,6 +588,8 @@ public class Menu extends JFrame implements ActionListener {
             } catch (Exception ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
+            timer.stop();
+            listBiometria.clear();
             initComponents();
         }
         actionInstance = false;
@@ -470,7 +607,7 @@ public class Menu extends JFrame implements ActionListener {
                 reloadListBiometria = false;
                 nitgen.removeDB();
                 reload = true;
-                listBiometria.isEmpty();
+                listBiometria.clear();
             } catch (Exception ex) {
                 Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -521,7 +658,7 @@ public class Menu extends JFrame implements ActionListener {
             setVisible(false);
         } else if (jc == cadastrar) {
             super.dispose();
-            new Gravar().setVisible(true);
+            // new Gravar().setVisible(true);
         } else if (jc == sair) {
             exit();
         } else if (jc == atualizar) {
@@ -540,7 +677,22 @@ public class Menu extends JFrame implements ActionListener {
 
             try {
                 for (int i = 0; i < 1; i++) {
-                    if (pool.getBiometriaCaptura() != null) {
+                    if (!WebService.existConnection()) {
+                        Preloader p = new Preloader();
+                        p.setAppTitle("Servidor offline, aguarde");
+                        p.setAppStatus("Servidor offline, aguarde");
+                        p.setWaitingStarted(false);
+                        p.show();
+                        for (int x = 0; x < 1; x++) {
+                            Thread.sleep(10000);
+                            if (WebService.existConnection()) {
+                                p.hide();
+                                break;
+                            }
+                            x--;
+                        }                        
+                    }
+                    if (pool.captura()) {                       
                         if (stop < 1) {
                             stop++;
                             start();
@@ -560,12 +712,33 @@ public class Menu extends JFrame implements ActionListener {
     };
 
     public void start() {
-        BiometriaDao biometriaDao = new BiometriaDao();
-        List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
+        Preloader p = new Preloader();
+        p.setAppTitle("Solicitação");
+        p.setAppStatus("Pedido de cadastramento recebido, aguarde");
+        p.setWaitingStarted(false);
+        p.show();
+        Integer codigo_pessoa = null;
         BiometriaCaptura bc = new BiometriaCaptura();
-        if (!list.isEmpty()) {
-            bc = (BiometriaCaptura) list.get(0);
-            biometria = biometriaDao.pesquisaBiometriaPorPessoa(bc.getPessoa().getId());
+        if (conf.getWeb_service()) {
+            try {
+                WebService webService = new WebService();
+                webService.action("pedido_captura");
+                webService.GET("biometria_captura");
+                webService.execute();
+                WSBiometriaCaptura wsbc = (WSBiometriaCaptura) webService.object(new WSBiometriaCaptura());
+                if (wsbc != null) {
+                    codigo_pessoa = wsbc.getCodigo_pessoa();
+                }
+            } catch (Exception ex) {
+            }
+        } else {
+            BiometriaDao biometriaDao = new BiometriaDao();
+            List list = biometriaDao.pesquisaBiometriaCapturaPorMacFilial(MacFilial.getAcessoFilial().getId());
+            codigo_pessoa = bc.getPessoa().getId();
+            if (!list.isEmpty()) {
+                bc = (BiometriaCaptura) list.get(0);
+                biometria = biometriaDao.pesquisaBiometriaPorPessoa(bc.getPessoa().getId());
+            }
         }
         super.setAlwaysOnTop(true);
         super.toFront();
@@ -579,31 +752,43 @@ public class Menu extends JFrame implements ActionListener {
             } else if (nitgen.getDevice_start() == 0) {
                 non_device();
             }
-            nitgen.setPessoa(bc.getPessoa());
-            Integer status = nitgen.readSave();
-            if (status != null) {
-                switch (status) {
-                    case 1:
-                        biometria = nitgen.getBiometria();
-                        JOptionPane.showMessageDialog(null, "Biometria cadastrada com sucesso");
-                        break;
-                    case 0:
-                        JOptionPane.showMessageDialog(null, "Erro ao cadastrar biometria");
-                        break;
-                    case 2:
-                        JOptionPane.showMessageDialog(null, "Digital não encontrada! Tente novamente!");
-                        break;
-                    case 3:
-                        JOptionPane.showMessageDialog(null, "Dispositivo desconectado!");
-                        break;
-                    case 4:
-                        JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário!");
-                        break;
-                    default:
-                        break;
+            p.hide();
+            Integer status = null;
+            if (conf.getWeb_service()) {
+                if (codigo_pessoa != null) {
+                    nitgen.setCodigo_pessoa(codigo_pessoa);
+                    status = nitgen.readSaveWS();
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Erro de status null!");
+                nitgen.setPessoa(bc.getPessoa());
+                status = nitgen.readSave();
+            }
+            if (codigo_pessoa != null) {
+                if (status != null) {
+                    switch (status) {
+                        case 1:
+                            JOptionPane.showMessageDialog(null, "Biometria cadastrada com sucesso");
+                            break;
+                        case 0:
+                            JOptionPane.showMessageDialog(null, "Erro ao cadastrar biometria");
+                            break;
+                        case 2:
+                            JOptionPane.showMessageDialog(null, "Digital não encontrada! Tente novamente!");
+                            break;
+                        case 3:
+                            JOptionPane.showMessageDialog(null, "Dispositivo desconectado!");
+                            break;
+                        case 4:
+                            JOptionPane.showMessageDialog(null, "Operação cancelada pelo usuário!");
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Erro de status null!");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Nenhuma pessoa encontrada!");
             }
             stop = 0;
             i = 0;
@@ -611,6 +796,7 @@ public class Menu extends JFrame implements ActionListener {
             biometria = null;
             nitgen.dispose();
         } catch (Exception e) {
+            p.hide();
             Close.clear();
         }
     }
@@ -624,20 +810,56 @@ public class Menu extends JFrame implements ActionListener {
     }
 
     public List getListBiometria() {
+        WebService webService = new WebService();
         if (reloadListBiometria) {
             if (!startedDate.equals(DataHoje.data())) {
-                reloadListBiometria = false;
-                listBiometria.clear();
-                startedDate = DataHoje.data();
-                new BiometriaDao().reload();
+                if (conf.getWeb_service()) {
+                    webService.param("device_number", conf.getDevice());
+                    webService.PUT("biometria_reload");
+                    try {
+                        webService.execute();
+                    } catch (Exception ex) {
+                    }
+                } else {
+                    reloadListBiometria = false;
+                    listBiometria.clear();
+                    startedDate = DataHoje.data();
+                    new BiometriaDao().reload();
+                }
             }
         }
         if (listBiometria.isEmpty()) {
             if (reloadListBiometria) {
-                listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
+                if (conf.getWeb_service()) {
+                    try {
+                        webService.GET("biometria_lista.jsf", "", "device_number=" + conf.getDevice());
+                        String result = webService.execute();
+                        Gson gson = new Gson();
+                        List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                        }.getType());
+                        converter(list);
+                    } catch (Exception ex) {
+                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
+                }
             } else if (nitgen != null) {
                 if (!nitgen.getExistsDB()) {
-                    listBiometria = new BiometriaDao().listBiometria();
+                    if (conf.getWeb_service()) {
+                        try {
+                            webService.GET("biometria_lista.jsf", "", "");
+                            String result = webService.execute();
+                            Gson gson = new Gson();
+                            List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
+                            }.getType());
+                            converter(list);
+                        } catch (Exception ex) {
+                            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        listBiometria = new BiometriaDao().listBiometria();
+                    }
                 }
             }
         }
@@ -663,6 +885,25 @@ public class Menu extends JFrame implements ActionListener {
 
     public void setTipo(Integer tipo) {
         this.tipo = tipo;
+    }
+
+    public void converter(List l) {
+        List<WSBiometria> list = l;
+        listBiometria = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            Biometria b = new Biometria();
+            Pessoa pessoa = new Pessoa();
+            pessoa.setId(list.get(i).getCodigo());
+            b.setId(list.get(i).getCodigo_biometria());
+            b.setPessoa(pessoa);
+            b.setBiometria(list.get(i).getBiometria());
+            b.setAtivo(list.get(i).getAtivo());
+            b.setDataAtualizacaoAparelho1(list.get(i).getDataAtualizacaoAparelho1());
+            b.setDataAtualizacaoAparelho2((list.get(i).getDataAtualizacaoAparelho2()));
+            b.setDataAtualizacaoAparelho3((list.get(i).getDataAtualizacaoAparelho3()));
+            b.setDataAtualizacaoAparelho4((list.get(i).getDataAtualizacaoAparelho4()));
+            listBiometria.add(b);
+        }
     }
 
 }
