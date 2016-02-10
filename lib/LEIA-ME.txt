@@ -1,0 +1,104 @@
+# Tipo de Operacao
+
+type 
+# Default 1 (Integer)
+1 => ler 
+2 => gravar
+
+# Cliente
+
+# Default "Sindical" (String)
+client
+
+# Filial
+
+filial
+# Default "" (String)
+# Define o nome do local de acesso para a base de dados.
+
+
+# Dispositivo
+
+device 
+# Default 0 (Integer)
+# Numero do dispositivo
+
+model 
+# Default "Hamster DX" (String)
+# Modelo do dispositivo
+
+placed 
+# Default true (Boolean)
+# habilita o sensor ao colocar o dedo
+
+
+session
+# Default FALSE (Se gera uma sessão)
+
+
+# EVITE ERROS
+
+* (String) usar sempre aspas dupla;
+* Abrir e fechar as tags;
+
+* Padrão JSON  
+Ex 1
+{"tag":"valor"}
+
+Ex 2 (Ver vírgulas)
+{
+"tag":"valor",
+"tag2":"valor2",
+"tag3": true,
+"tag4": 200
+}
+
+
+********************************************************************************************
+
+
+# LOCAL DB
+# local_db (default : true) (Boolean), mantém uma base local de dados, 
+no diretório 
+
+(default)
+local_db = true 
+
+Se for "Nitgen - Hamster DX":
+	Local
+		Windows: C:/Windows/Users/%UserName%/AppData/Roaming/rtools/biometria/nitgen/hamsterdx/data.ISDB
+		Linux: /usr/local/.... (a definir)
+
+
+********************************************************************************************
+
+
+# Marca
+# brand
+TopData (Gravação pelo layout de digital da catraca topdata)
+Nitgen (Gravação pelo layout de digital da Nitgen)
+
+
+#WEB SERVICE (Indisponível)
+# "ssl": false,
+# "user": "rtools",
+# "password": "ah4v58htyjgXFHschf7yGHhnhj483f2g4t5hs-321fggf3**HTLP*21w81321vcxbnmnm",
+# "app": "test",
+# "key": "123456",
+# "port": "80",
+# "web_service": false
+
+
+#DATABASE
+
+{
+   
+"host": "ip do servidor",
+    
+"port": "porta do servidor",
+
+"database": "base de dados",
+    
+"password": "senha"
+
+}

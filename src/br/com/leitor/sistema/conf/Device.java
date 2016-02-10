@@ -43,7 +43,7 @@ public class Device {
         }
         Logs logs = new Logs();
         try {
-            File file = new File(path + "\\lib\\device.json");
+            File file = new File(path + "\\lib\\conf\\device.json");
             if (!file.exists()) {
                 return;
             }

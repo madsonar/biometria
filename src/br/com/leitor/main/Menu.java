@@ -173,7 +173,7 @@ public class Menu extends JFrame implements ActionListener {
             //cadastrar.setActionCommand("Cadastrar");
             sair = new JMenuItem("Sair");
             ocultar = new JMenuItem("");
-            ocultar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/images/arrow_right_down_16x16.png")).getImage()));
+            ocultar.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/resources/images/arrow_right_down_16x16.png")).getImage()));
             ocultar.setToolTipText("Esconder na bandeja do sistema");
             atualizar = new JMenuItem("Atualizar");
             sair.addActionListener(this);
@@ -243,7 +243,7 @@ public class Menu extends JFrame implements ActionListener {
             popupMenu.addSeparator();
             popupMenu.add(exitItem);
             popupMenu.addSeparator();
-            TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
+            TrayIcon trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("/resources/images/finger_16x16.png")).getImage(), "Leitor Biométrico - " + title);
             trayIcon.addActionListener(actionListener);
             trayIcon.setPopupMenu(popupMenu);
 
@@ -658,7 +658,7 @@ public class Menu extends JFrame implements ActionListener {
             setVisible(false);
         } else if (jc == cadastrar) {
             super.dispose();
-            new Gravar().setVisible(true);
+            // new Gravar().setVisible(true);
         } else if (jc == sair) {
             exit();
         } else if (jc == atualizar) {

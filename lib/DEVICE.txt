@@ -1,0 +1,22 @@
+# Invisivel
+
+invisible
+# Default true (Boolean)
+# Opção usada para leitura da biometria
+# Não fica mostrando o dispositivo ne tela
+
+# Tela de boas vindas
+
+welcome
+# Default false (Boolean)
+# Opção mostrar tela de boas vindas do dispositivo
+
+
+# Tela de boas vindas
+
+disabled_finger
+# Default null (List)
+# Desabilita dedos
+# 1 ao 5 - mão esquerda
+# 6 ao 10 - mão direita
+# disabled_finger : [1,2,3,4,5,6,7,8,9,10] (Colocar os dedos entre colchetes)

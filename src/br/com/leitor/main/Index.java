@@ -1,5 +1,6 @@
 package br.com.leitor.main;
 
+import br.com.leitor.utils.CopyFilesConf;
 import br.com.leitor.dao.Dao;
 import br.com.leitor.pessoa.BiometriaServidor;
 import br.com.leitor.pessoa.dao.BiometriaDao;
@@ -45,6 +46,7 @@ public final class Index extends JFrame implements ActionListener {
     private final Conf conf;
 
     public static void main(String args[]) {
+        new CopyFilesConf().load();
         Conf confx = new Conf();
         confx.loadJson();
         Block.TYPE = "" + confx.getType();
@@ -104,7 +106,7 @@ public final class Index extends JFrame implements ActionListener {
                 }
             } catch (Exception ex) {
                 String erroMessage;
-                if(ex.getMessage().equals("Connection refused: connect")) {
+                if (ex.getMessage().equals("Connection refused: connect")) {
                     erroMessage = "Conexão recusada, servidor esta Offline!";
                 } else {
                     erroMessage = ex.getMessage();

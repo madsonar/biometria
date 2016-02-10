@@ -26,8 +26,8 @@ public class Preloader {
         frame = new JFrame("Iniciando a aplicação");
         appIcon = "ajax-loader.gif";
         appFrameIcon = "";
-        frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + "frame_icon.png");
-        icon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + appIcon);
+        frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + "frame_icon.png");
+        icon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + appIcon);
         appTitle = "Aplicativo";
         appStatus = "loading...";
         // ESPERAR AO INICIAR
@@ -46,9 +46,9 @@ public class Preloader {
     public void show(String message) {
         try {
             if (appFrameIcon.isEmpty()) {
-                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + "frame_icon.png");
+                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + "frame_icon.png");
             } else {
-                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + appFrameIcon);
+                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + appFrameIcon);
                 appFrameIcon = "";
             }
             frame = new JFrame("Iniciando a aplicação");
@@ -62,7 +62,7 @@ public class Preloader {
             // frame.setOpacity(opacity);
             // frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             if (showIcon) {
-                icon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + appIcon);
+                icon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + appIcon);
             }
             frame.setTitle(appTitle);
             frame.add(new JLabel(appStatus, icon, JLabel.CENTER));
@@ -92,9 +92,9 @@ public class Preloader {
 
             frame.setVisible(false);
             if (appFrameIcon.isEmpty()) {
-                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + "frame_icon.png");
+                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + "frame_icon.png");
             } else {
-                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + appFrameIcon);
+                frameIcon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + appFrameIcon);
                 appFrameIcon = "";
             }
             frame = new JFrame("Iniciando a aplicação");
@@ -114,7 +114,7 @@ public class Preloader {
                 frame.setSize(frame_w, frame_h);
             }
             if (showIcon) {
-                icon = new ImageIcon(Path.getRealPath() + "\\src\\images\\" + appIcon);
+                icon = new ImageIcon(Path.getRealPath() + "\\src\\resources\\images\\" + appIcon);
             }
             frame.add(new JLabel(status, icon, JLabel.CENTER));
             if (topFrame) {

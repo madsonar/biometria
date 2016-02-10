@@ -64,7 +64,7 @@ public class ConfWebService {
         }
         Logs logs = new Logs();
         try {
-            File file = new File(path + "\\lib\\web_service.json");
+            File file = new File(path + "\\lib\\conf\\web_service.json");
             if (!file.exists()) {
                 return;
             }
