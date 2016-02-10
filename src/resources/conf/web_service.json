@@ -1,0 +1,10 @@
+{
+    "url": "192.168.1.160",
+	"client": "Sindical",
+	"context": "Sindical",
+    "ssl": false,
+    "user": "rtools",
+    "password": "Ty5*6h",
+    "app": "Biometria",
+    "port": "8080"	
+}

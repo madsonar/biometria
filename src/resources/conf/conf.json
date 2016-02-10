@@ -1,0 +1,20 @@
+{
+    "client": "Sindical",
+    "filial": "Desenvolvimento",
+    "type": 2,
+    "device": 3,
+    "brand": "Nitgen",
+    "model": "Hamster DX",
+    "version": "",
+    "ip": "",
+    "local_db": true,
+    "placed": false,
+    "ssl": false,
+    "user": "sistemartools",
+    "password": "ah4v58htyjgXFHschf7yGHhnhj483f2g4t5hs-321fggf3**HTLP*21w81321vcxbnmnm",
+    "app": "teste",
+    "key": "12345",
+    "port": "8080",
+    "web_service": true,
+	"session": true
+}
