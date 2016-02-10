@@ -829,6 +829,9 @@ public class Menu extends JFrame implements ActionListener {
             }
         }
         if (listBiometria.isEmpty()) {
+            if (!nitgen.getExistsDB()) {
+                reloadListBiometria = false;
+            }
             if (reloadListBiometria) {
                 if (conf.getWeb_service()) {
                     try {
