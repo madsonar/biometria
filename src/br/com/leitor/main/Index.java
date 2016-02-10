@@ -23,8 +23,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -105,9 +103,15 @@ public final class Index extends JFrame implements ActionListener {
                     return;
                 }
             } catch (Exception ex) {
+                String erroMessage;
+                if(ex.getMessage().equals("Connection refused: connect")) {
+                    erroMessage = "Conexão recusada, servidor esta Offline!";
+                } else {
+                    erroMessage = ex.getMessage();
+                }
                 JOptionPane.showMessageDialog(null,
-                        wSStatus.getDescricao(),
-                        "Validação",
+                        erroMessage,
+                        "Erro",
                         JOptionPane.WARNING_MESSAGE);
                 Logs logs = new Logs();
                 logs.save("index", ex.getMessage());
