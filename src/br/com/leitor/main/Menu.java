@@ -835,6 +835,7 @@ public class Menu extends JFrame implements ActionListener {
             if (reloadListBiometria) {
                 if (conf.getWeb_service()) {
                     try {
+                        webService.action("reload");
                         webService.GET("biometria_lista.jsf", "", "device_number=" + conf.getDevice());
                         String result = webService.execute();
                         Gson gson = new Gson();
