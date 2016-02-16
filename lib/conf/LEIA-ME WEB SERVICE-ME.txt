@@ -1,0 +1,45 @@
+WEB SERVICE
+
+# ssl: 
+Se conexão é criptografada
+default: false
+
+# user
+Nome do usuário do web serviçe
+default: ''
+
+# password 
+Senha do usu�rio do web serviçe
+default: ''
+
+# app
+Nome do App
+default: ''
+
+# key
+Chave de segurança do App caso exista
+default: ''
+
+# port
+Porta do servi�o/site/url/ip
+default: 80
+
+# context
+Contexto principal do projeto, se existir
+default: ''
+
+
+********************************************************************************
+*                                                                               *
+*                                                                               *
+*                       INSTALAÇÃO / CONFIGURAÇÃO                               *
+*                                                                               *
+*                                                                               *
+********************************************************************************
+
+* OBS: caso não existir, mover o arquivo web_service.json que esta na pasta
+"/src/resouces/json/" para o caminho 
+
+( C: ou D: ou E: ou / )/.../Project/lib/conf/web_service.json
+
+e definir as configurações da sua aplicação
