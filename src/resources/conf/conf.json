@@ -16,5 +16,6 @@
     "key": "12345",
     "port": "8080",
     "web_service": true,
-	"session": true
+    "session": true,
+    "catraca_server": ""
 }
