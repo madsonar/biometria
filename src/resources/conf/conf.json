@@ -17,5 +17,6 @@
     "port": "8080",
     "web_service": true,
     "session": true,
-    "catraca_server": ""
+    "catraca_server": "",
+    "catraca_number": null
 }
