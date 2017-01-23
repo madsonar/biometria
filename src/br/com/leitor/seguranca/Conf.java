@@ -35,6 +35,10 @@ public class Conf {
     private Integer port;
     private Boolean web_service;
     private Boolean ssl;
+    private Boolean socket;
+    private Integer socket_port;
+    private String catraca_server;
+    private Integer catraca_number;
 
     public Conf() {
         this.client = "";
@@ -56,9 +60,13 @@ public class Conf {
         this.port = null;
         this.web_service = false;
         this.ssl = false;
+        this.socket = true;
+        this.socket_port = 5566;
+        this.catraca_server = "";
+        this.catraca_number = null;
     }
 
-    public Conf(String client, Integer type, Integer device, String brand, String model, String ip, Boolean local_db, Boolean placed, String filial, String app, String key, String user, String password, String method, String action, Integer port, Boolean web_service, Boolean ssl) {
+    public Conf(String client, Integer type, Integer device, String brand, String model, String ip, Boolean local_db, Boolean placed, String filial, String app, String key, String user, String password, String method, String action, Integer port, Boolean web_service, Boolean ssl, Boolean socket, Integer socket_port, String catraca_server, Integer catraca_number) {
         this.client = client;
         this.type = type;
         this.device = device;
@@ -77,6 +85,10 @@ public class Conf {
         this.port = port;
         this.web_service = web_service;
         this.ssl = ssl;
+        this.socket = socket;
+        this.socket_port = socket_port;
+        this.catraca_server = catraca_server;
+        this.catraca_number = catraca_number;
     }
 
     public void loadJson() {
@@ -195,7 +207,16 @@ public class Conf {
                 } catch (Exception e) {
                     // logs.save("Conf Erro", "(Boolean) ssl: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
                 }
-
+            }
+            try {
+                socket = jSONObject.getBoolean("socket");
+            } catch (Exception e) {
+                // logs.save("Conf Erro", "(Boolean) ssl: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
+            }
+            try {
+                socket_port = jSONObject.getInt("socket_port");
+            } catch (Exception e) {
+                // logs.save("Conf Erro", "(Boolean) ssl: Configuração errada.  Verique o arquivo de configuração (conf)." + e.getMessage());
             }
         } catch (JSONException ex) {
             logs.save("Conf JSONException", ex.getMessage());
@@ -345,6 +366,38 @@ public class Conf {
 
     public void setLocal_db(Boolean local_db) {
         this.local_db = local_db;
+    }
+
+    public Boolean getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Boolean socket) {
+        this.socket = socket;
+    }
+
+    public Integer getSocket_port() {
+        return socket_port;
+    }
+
+    public void setSocket_port(Integer socket_port) {
+        this.socket_port = socket_port;
+    }
+
+    public String getCatraca_server() {
+        return catraca_server;
+    }
+
+    public void setCatraca_server(String catraca_server) {
+        this.catraca_server = catraca_server;
+    }
+
+    public Integer getCatraca_number() {
+        return catraca_number;
+    }
+
+    public void setCatraca_number(Integer catraca_number) {
+        this.catraca_number = catraca_number;
     }
 
 }

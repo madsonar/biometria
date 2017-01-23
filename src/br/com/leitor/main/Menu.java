@@ -33,10 +33,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +84,7 @@ public class Menu extends JFrame implements ActionListener {
     private String startedDate = DataHoje.data();
     private Boolean actionInstance;
     public Preloader preloader;
+    // private ServerSocket srvSocket;
 
     static {
         try {
@@ -306,8 +312,8 @@ public class Menu extends JFrame implements ActionListener {
                         break;
                     }
                     x--;
-                }                        
-            }            
+                }
+            }
             WebService webService = new WebService();
             if (actionInstance) {
                 return;
@@ -471,16 +477,18 @@ public class Menu extends JFrame implements ActionListener {
                         webService.GET("biometria_atualiza_catraca");
                         try {
                             webService.execute();
-                            if (webService.wSStatus().getCodigo().equals(0)) {
-                                if (status == 1) {
+                            if (conf.getCatraca_server().isEmpty()) {
+                                if (getCatraca(id)) {
+//                                    if (status == 1) {
+//                                        Logs logs = new Logs();
+//                                        logs.save("menu", "Biometria Catraca - Não encontrada!");
+//                                        return;
+//                                    }
+                                } else {
                                     Logs logs = new Logs();
-                                    logs.save("menu", "Biometria Catraca - Não encontrada!");
+                                    logs.save("erro", "Erro na hora de atualizar a catraca!");
                                     return;
                                 }
-                            } else {
-                                Logs logs = new Logs();
-                                logs.save("erro", "Erro na hora de atualizar a catraca!");
-                                return;
                             }
                         } catch (Exception ex) {
 
@@ -674,7 +682,42 @@ public class Menu extends JFrame implements ActionListener {
 
         @Override
         public void run() {
-
+//            if (conf.getSocket()) {
+//                String result = "";
+//                while (true) {
+//                    try {
+//                        srvSocket = new ServerSocket(conf.getSocket_port());
+//                        Socket socket = srvSocket.accept();
+//                        if (!WebService.existConnection()) {
+//                            Preloader p = new Preloader();
+//                            p.setAppTitle("Servidor offline, aguarde");
+//                            p.setAppStatus("Servidor offline, aguarde");
+//                            p.setWaitingStarted(false);
+//                            p.show();
+//                            for (int x = 0; x < 1; x++) {
+//                                Thread.sleep(10000);
+//                                if (WebService.existConnection()) {
+//                                    p.hide();
+//                                    break;
+//                                }
+//                                x--;
+//                            }
+//                        }
+//                        if (pool.captura()) {
+//                            if (stop < 1) {
+//                                stop++;
+//                                start();
+//                                pool = new Pool();
+//                            }
+//                        } else {
+//                            // Thread.
+//                        }
+//                        Thread.sleep(4000);
+//                    } catch (IOException | InterruptedException e) {
+//
+//                    }
+//                }
+//            } else {
             try {
                 for (int i = 0; i < 1; i++) {
                     if (!WebService.existConnection()) {
@@ -690,9 +733,9 @@ public class Menu extends JFrame implements ActionListener {
                                 break;
                             }
                             x--;
-                        }                        
+                        }
                     }
-                    if (pool.captura()) {                       
+                    if (pool.captura()) {
                         if (stop < 1) {
                             stop++;
                             start();
@@ -709,6 +752,7 @@ public class Menu extends JFrame implements ActionListener {
                 Close.clear();
             }
         }
+//        }
     };
 
     public void start() {
@@ -842,8 +886,10 @@ public class Menu extends JFrame implements ActionListener {
                         List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
                         }.getType());
                         converter(list);
+
                     } catch (Exception ex) {
-                        Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(Menu.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
                 } else {
                     listBiometria = new BiometriaDao().reloadListBiometria(conf.getDevice());
@@ -858,8 +904,10 @@ public class Menu extends JFrame implements ActionListener {
                             List<WSBiometria> list = gson.fromJson(result, new TypeToken<List<WSBiometria>>() {
                             }.getType());
                             converter(list);
+
                         } catch (Exception ex) {
-                            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(Menu.class
+                                    .getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
                         listBiometria = new BiometriaDao().listBiometria();
@@ -910,4 +958,64 @@ public class Menu extends JFrame implements ActionListener {
         }
     }
 
+    public Boolean getCatraca(Integer codigo_pessoa) {
+        try {
+            StringBuilder response = new StringBuilder();
+            URL url = new URL(conf.getCatraca_server() + "/monitorCatraca/ws/liberar_pessoa.xhtml?cliente=" + conf.getClient() + "&pessoa=" + codigo_pessoa + "&" + "catraca=" + conf.getCatraca_number());
+            Charset charset = Charset.forName("UTF8");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+            con.setRequestMethod("GET");
+            con.connect();
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), charset))) {
+                response.append(in.readLine());
+                in.close();
+            }
+            con.disconnect();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
 }
+
+//                    FutureTask<String> theTask = null;
+//                    Thread thread = null;
+//                    try {
+//
+//                        // EXECUTA A QUERY COM UM TEMPO LIMITE ----------------------
+//                        theTask = new FutureTask(new Callable() {
+//                            @Override
+//                            public Object call() throws Exception {
+//                                String result = "";
+//                                try {
+//                                    result = "SUCCESS";
+//                                } catch (Exception e) {
+//                                    e.getMessage();
+//                                    result = "INTERRUPTED";
+//                                }
+//                                return result;
+//                            }
+//
+//                        });
+//                        thread = new Thread(theTask);
+//                        thread.start();
+//                        result = theTask.get(60 * 60, TimeUnit.MINUTES);
+//                        theTask.cancel(true);
+//                        try {
+//                            thread.interrupt();
+//                        } catch (Exception e) {
+//
+//                        }
+//                   
+//                }catch (TimeoutException | InterruptedException | ExecutionException ee) {
+//                        if (theTask != null) {
+//                            theTask.cancel(true);
+//                        }
+//                        if (thread != null) {
+//                            thread.interrupt();
+//                        }
+//                        result = "TIMEOUT";
+//                    }

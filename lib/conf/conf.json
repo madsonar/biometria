@@ -16,5 +16,7 @@
     "key": "12345",
     "port": "8080",
     "web_service": true,
-	"session": true
+	"session": true,
+	"socket":true,
+	"socket_port":5566
 }
