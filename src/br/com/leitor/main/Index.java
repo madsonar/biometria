@@ -89,6 +89,7 @@ public final class Index extends JFrame implements ActionListener {
         device.loadJson();
         WebService webService = new WebService();
         WSStatus wSStatus = new WSStatus();
+        String mac = Mac.getInstance();
         if (conf.getWeb_service()) {
             webService.GET("autenticar_dispositivo.jsf", "", "");
             try {
@@ -122,7 +123,7 @@ public final class Index extends JFrame implements ActionListener {
             }
         }
         if (conf.getType().equals(2)) {
-            String mac = Mac.getInstance();
+             mac = Mac.getInstance();
             if (conf.getWeb_service()) {
                 webService.PUT("biometria_habilitar.jsf", "", "habilitar=true");
                 try {

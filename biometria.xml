@@ -2,18 +2,22 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>D:\MEUS PROJETOS\GIT\biometria\dist\Leitor.jar</jar>
-  <outfile>D:\MEUS PROJETOS\GIT\biometria\dist\Biometria.exe</outfile>
+  <jar>\dist\Leitor.jar</jar>
+  <outfile>Biometria.exe</outfile>
   <errTitle>Erro</errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
   <downloadUrl>http://java.com/download</downloadUrl>
-  <supportUrl></supportUrl>
+  <supportUrl>www.rtools.com.br</supportUrl>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>D:\MEUS PROJETOS\GIT\biometria\src\resources\images\favicon.ico</icon>
+  <icon>favicon.ico</icon>
+  <singleInstance>
+    <mutexName>Biometria Single Instance Mutex : {c96f7db4-d743-4718-bef0-8533a198bcca}</mutexName>
+    <windowTitle>Biometria</windowTitle>
+  </singleInstance>
   <classPath>
     <mainClass>br.com.leitor.main.Index</mainClass>
   </classPath>
@@ -23,9 +27,16 @@
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.7.0</minVersion>
     <maxVersion>1.8.0</maxVersion>
-    <jdkPreference>preferJre</jdkPreference>
-    <runtimeBits>32/64</runtimeBits>
+    <jdkPreference>preferJdk</jdkPreference>
+    <runtimeBits>32</runtimeBits>
+    <opt>-Djava.library.path=&quot;%systemroot%\\System32\\&quot;</opt>
   </jre>
+  <splash>
+    <file>slash.bmp</file>
+    <waitForWindow>true</waitForWindow>
+    <timeout>60</timeout>
+    <timeoutErr>true</timeoutErr>
+  </splash>
   <versionInfo>
     <fileVersion>1.0.0.0</fileVersion>
     <txtFileVersion>1.0</txtFileVersion>
@@ -39,10 +50,10 @@
     <originalFilename>Biometria.exe</originalFilename>
   </versionInfo>
   <messages>
-    <startupErr>Erro ao iniciar aplicação</startupErr>
-    <bundledJreErr>This application was configured to use a bundled Java Runtime Environment but the runtime is missing or corrupted.</bundledJreErr>
-    <jreVersionErr>This application requires a Java Runtime Environment</jreVersionErr>
-    <launcherErr>The registry refers to a nonexistent Java Runtime Environment installation or the runtime is corrupted.</launcherErr>
-    <instanceAlreadyExistsMsg>An application instance is already running.</instanceAlreadyExistsMsg>
+    <startupErr>Erro ao iniciar a aplicação</startupErr>
+    <bundledJreErr>Este aplicativo foi configurado para usar um Java Runtime Environment, mas o runtime está ausente ou corrompido.</bundledJreErr>
+    <jreVersionErr>Este aplicativo requer um Java Runtime Environment.</jreVersionErr>
+    <launcherErr>O registro se refere a uma instalação Java Runtime Environment não existente ou o tempo de execução está corrompido</launcherErr>
+    <instanceAlreadyExistsMsg>Uma instância do aplicativo já está em execução.</instanceAlreadyExistsMsg>
   </messages>
 </launch4jConfig>

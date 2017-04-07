@@ -20,6 +20,9 @@ import br.com.leitor.webservice.classes.WSBiometria;
 import br.com.leitor.webservice.classes.WSBiometriaCaptura;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Platform;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Container;
@@ -39,6 +42,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -59,7 +64,16 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import rtools.WebService;
 
+// MANTER AS CONFIGURAÇÕES DO JAVA JDK PARA 32 BITS
 public class Menu extends JFrame implements ActionListener {
+
+    public interface simpleDLL extends Library {
+
+        simpleDLL INSTANCE = (simpleDLL) Native.loadLibrary(
+                (Platform.isWindows() ? "simpleDLL" : "simpleDLLLinuxPort"), simpleDLL.class);
+
+        int giveIntGetInt(int a);               // int giveIntGetInt(int a);
+    }
 
     private Integer tipo;
     public JMenuBar barra;
@@ -84,7 +98,7 @@ public class Menu extends JFrame implements ActionListener {
     private String startedDate = DataHoje.data();
     private Boolean actionInstance;
     public Preloader preloader;
-    // private ServerSocket srvSocket;
+    private ServerSocket serverSocket;
 
     static {
         try {
@@ -735,7 +749,25 @@ public class Menu extends JFrame implements ActionListener {
                             x--;
                         }
                     }
-                    if (pool.captura()) {
+                    Boolean captura = false;
+                    if (conf.getSocket()) {
+                        if (conf.getSocket_port() == 0 || conf.getSocket_port() == null) {
+                            JOptionPane.showMessageDialog(null, "PORTA DO SOCKET NÃO CONFIGURADA!");
+                            System.exit(0);
+                        }
+                        try {
+                            serverSocket = null;
+                            serverSocket = new ServerSocket(conf.getSocket_port());
+                            Socket socket = serverSocket.accept();
+                            serverSocket.close();
+                            captura = true;
+                        } catch (IOException e) {
+                            captura = false;
+                        }
+                    } else {
+                        captura = pool.captura();
+                    }
+                    if (captura) {
                         if (stop < 1) {
                             stop++;
                             start();
@@ -744,7 +776,9 @@ public class Menu extends JFrame implements ActionListener {
                     } else {
                         // Thread.
                     }
-                    Thread.sleep(4000);
+                    if (conf.getSocket() == null || !conf.getSocket()) {
+                        Thread.sleep(4000);
+                    }
                     i--;
                 }
             } catch (Exception e) {

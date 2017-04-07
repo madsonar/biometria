@@ -1,0 +1,138 @@
+
+
+Version:	3.8
+CmdLine:	D:\MEUS PROJETOS\GIT\biometria\Biometria.exe --l4j-debug
+WOW64:		yes
+Error:		Instance already exists.
+
+
+Version:	3.8
+CmdLine:	D:\MEUS PROJETOS\GIT\biometria\Biometria.exe --l4j-debug
+WOW64:		yes
+Working dir:	D:\MEUS PROJETOS\GIT\biometria\.
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7.0_75
+Check launcher:	C:\Program Files (x86)\Java\jdk1.7.0_75\jre\bin\javaw.exe (OK)
+Match:		1.7.0_75
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8
+Check launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe (OK)
+Match:		1.8
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8.0_40
+Ignore:		1.8.0_40
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7.0_76
+Ignore:		1.7.0_76
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8.0_40
+Ignore:		1.8.0_40
+Runtime used:	1.8 (32-bit)
+Substitute:	systemroot = C:\WINDOWS
+Info:		Classpath not defined.
+Launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe
+Launcher args:	-Djava.library.path="C:\WINDOWS\\System32\\" -classpath "D:\MEUS PROJETOS\GIT\biometria\Biometria.exe" br.com.leitor.main.Index
+Args length:	127/32768 chars
+Exit code:	259
+
+
+Version:	3.8
+CmdLine:	D:\MEUS PROJETOS\GIT\biometria\Biometria.exe --l4j-debug
+WOW64:		yes
+Working dir:	D:\MEUS PROJETOS\GIT\biometria\.
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7.0_75
+Check launcher:	C:\Program Files (x86)\Java\jdk1.7.0_75\jre\bin\javaw.exe (OK)
+Match:		1.7.0_75
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8
+Check launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe (OK)
+Match:		1.8
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8.0_40
+Ignore:		1.8.0_40
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7.0_76
+Ignore:		1.7.0_76
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8.0_40
+Ignore:		1.8.0_40
+Runtime used:	1.8 (32-bit)
+Substitute:	systemroot = C:\WINDOWS
+Info:		Classpath not defined.
+Launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe
+Launcher args:	-Djava.library.path="C:\WINDOWS\\System32\\" -classpath "D:\MEUS PROJETOS\GIT\biometria\Biometria.exe" br.com.leitor.main.Index
+Args length:	127/32768 chars
+Exit code:	259
+
+
+Version:	3.8
+CmdLine:	D:\MEUS PROJETOS\GIT\biometria\Biometria.exe --l4j-debug
+WOW64:		yes
+Working dir:	D:\MEUS PROJETOS\GIT\biometria\.
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7.0_75
+Check launcher:	C:\Program Files (x86)\Java\jdk1.7.0_75\jre\bin\javaw.exe (OK)
+Match:		1.7.0_75
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8
+Check launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe (OK)
+Match:		1.8
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8.0_40
+Ignore:		1.8.0_40
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7.0_76
+Ignore:		1.7.0_76
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8.0_40
+Ignore:		1.8.0_40
+Runtime used:	1.8 (32-bit)
+Substitute:	systemroot = C:\WINDOWS
+Info:		Classpath not defined.
+Launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe
+Launcher args:	-Djava.library.path="C:\WINDOWS\\System32\\" -classpath "D:\MEUS PROJETOS\GIT\biometria\Biometria.exe" br.com.leitor.main.Index
+Args length:	127/32768 chars
+Exit code:	259
+
+
+Version:	3.8
+CmdLine:	D:\MEUS PROJETOS\GIT\biometria\Biometria.exe --l4j-debug
+WOW64:		yes
+Working dir:	D:\MEUS PROJETOS\GIT\biometria\.
+32-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.7.0_75
+Check launcher:	C:\Program Files (x86)\Java\jdk1.7.0_75\jre\bin\javaw.exe (OK)
+Match:		1.7.0_75
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8
+Check launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe (OK)
+Match:		1.8
+Check:		SOFTWARE\JavaSoft\Java Development Kit\1.8.0_40
+Ignore:		1.8.0_40
+32-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7
+Ignore:		1.7
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7.0_76
+Ignore:		1.7.0_76
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8
+Ignore:		1.8
+Check:		SOFTWARE\JavaSoft\Java Runtime Environment\1.8.0_40
+Ignore:		1.8.0_40
+Runtime used:	1.8 (32-bit)
+Substitute:	systemroot = C:\WINDOWS
+Info:		Classpath not defined.
+Launcher:	C:\PROGRA~2\Java\JDK18~1.0_4\jre\bin\javaw.exe
+Launcher args:	-Djava.library.path="C:\WINDOWS\\System32\\" -classpath "D:\MEUS PROJETOS\GIT\biometria\Biometria.exe" br.com.leitor.main.Index
+Args length:	127/32768 chars
+Exit code:	259
