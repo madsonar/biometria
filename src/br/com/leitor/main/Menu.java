@@ -876,6 +876,7 @@ public class Menu extends JFrame implements ActionListener {
         } catch (Exception e) {
             p.hide();
             Close.clear();
+            System.exit(0);
         }
     }
 

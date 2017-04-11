@@ -88,9 +88,9 @@ public class Nitgen {
             device_info_ex = this.device.DeviceInfo[0];
         } catch (NoSuchFieldError | UnsatisfiedLinkError | Exception e) {
             Logs logs = new Logs();
-            logs.save("menu", "Erro ao carregar DLL. " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Erro ao carregar DLL. " + e.getMessage());
-            throw new Exception("Erro ao carregar DLL. " + e.getMessage());
+            logs.save("menu", "Erro ao carregar DLL OU DISPOSITIVO NÃO ENCONTRADO. " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao carregar DLL OU DISPOSITIVO NÃO ENCONTRADO. " + e.getMessage());
+            throw new Exception("Erro ao carregar DLL OU DISPOSITIVO NÃO ENCONTRADO. " + e.getMessage());
         }
         device_start = n;
         if (n == 0) {
@@ -429,7 +429,7 @@ public class Nitgen {
                     }
                     this.digitalCapturada = nBioBSP.GetTextFIRFromHandle(hFIR, textSavedFIR);
                     this.digitalCapturadaString = textSavedFIR.TextFIR;
-                    if(this.digitalCapturadaString == null) {
+                    if (this.digitalCapturadaString == null) {
                         return 2;
                     }
                     nBioBSP.CloseDevice(device.DeviceInfo[0].NameID, device.DeviceInfo[0].Instance);
