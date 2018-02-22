@@ -33,7 +33,7 @@ placed
 
 
 session
-# Default FALSE (Se gera uma sessão)
+# Default FALSE (Se gera uma sessao)
 
 
 # EVITE ERROS
@@ -41,11 +41,11 @@ session
 * (String) usar sempre aspas dupla;
 * Abrir e fechar as tags;
 
-* Padrão JSON  
+* Padrao JSON  
 Ex 1
 {"tag":"valor"}
 
-Ex 2 (Ver vírgulas)
+Ex 2 (Ver vï¿½rgulas)
 {
 "tag":"valor",
 "tag2":"valor2",
@@ -53,13 +53,20 @@ Ex 2 (Ver vírgulas)
 "tag4": 200
 }
 
+# IP
+
+# Default "" (String)
+ip
+
+* Seria o ip relacionado a catraca no cliente
+
 
 ********************************************************************************************
 
 
 # LOCAL DB
-# local_db (default : true) (Boolean), mantém uma base local de dados, 
-no diretório 
+# local_db (default : true) (Boolean), mantï¿½m uma base local de dados, 
+no diretï¿½rio 
 
 (default)
 local_db = true 
@@ -75,11 +82,11 @@ Se for "Nitgen - Hamster DX":
 
 # Marca
 # brand
-TopData (Gravação pelo layout de digital da catraca topdata)
-Nitgen (Gravação pelo layout de digital da Nitgen)
+TopData (Gravaï¿½ï¿½o pelo layout de digital da catraca topdata)
+Nitgen (Gravaï¿½ï¿½o pelo layout de digital da Nitgen)
 
 
-#WEB SERVICE (Indisponível)
+#WEB SERVICE (Indisponï¿½vel)
 # "ssl": false,
 # "user": "rtools",
 # "password": "ah4v58htyjgXFHschf7yGHhnhj483f2g4t5hs-321fggf3**HTLP*21w81321vcxbnmnm",
