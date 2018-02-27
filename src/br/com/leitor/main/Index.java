@@ -123,7 +123,7 @@ public final class Index extends JFrame implements ActionListener {
             }
         }
         if (conf.getType().equals(2)) {
-             mac = Mac.getInstance();
+            mac = Mac.getInstance();
             if (conf.getWeb_service()) {
                 webService.PUT("biometria_habilitar.jsf", "", "habilitar=true");
                 try {
